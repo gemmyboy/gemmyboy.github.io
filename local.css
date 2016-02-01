@@ -7,6 +7,11 @@
     -webkit-transform: rotate(360deg);
   }
 }
+
+.rotate-cont {
+    animation: rotate 2.0s infinite linear;
+}
+
 .rotate:hover {
     -webkit-animation-name: rotate;
     -webkit-animation-duration: 2.0s;
