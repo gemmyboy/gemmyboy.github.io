@@ -1,0 +1,11 @@
+﻿body #site_header {
+    width: 100%;
+    height: 10%;
+    background-color: #014421;
+}
+
+body #site_content {
+    min-height: 200px;
+    height: 90%;
+    background-color: #266A2E;
+}
