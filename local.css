@@ -8,11 +8,24 @@
   }
 }
 .rotate:hover {
-    -webkit-animation-name:             rotate; 
-    -webkit-animation-duration:         2.0s; 
-    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-name: rotate;
+    -webkit-animation-duration: 2.0s;
+    -webkit-animation-iteration-count: infinite;
     -webkit-animation-timing-function: linear;
 }
+
+@-webkit-keyframes color_change {
+	from { color: darkgrey; }
+	to { color: #266A2E; }
+}
+
+.animate_color {
+    animation: color_change 1s infinite alternate;
+}
+
+
+
+
     
 body #site_header {
     width: 100%;
