@@ -9,7 +9,7 @@
 }
 
 .rotate-cont {
-    animation: rotate 2.0s infinite linear;
+    animation: rotate 8.0s infinite linear;
 }
 
 .rotate:hover {
