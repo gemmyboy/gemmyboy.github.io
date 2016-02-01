@@ -1,7 +1,26 @@
-﻿body #site_header {
+﻿
+@-webkit-keyframes rotate {
+   from {
+    -webkit-transform: rotate(0deg);
+  }
+  to { 
+    -webkit-transform: rotate(360deg);
+  }
+}
+.rotate:hover {
+    -webkit-animation-name:             rotate; 
+    -webkit-animation-duration:         2.0s; 
+    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-timing-function: linear;
+}
+    
+body #site_header {
     width: 100%;
     height: 10%;
     background-color: #014421;
+    color: white;
+    font-size: 75px;
+    margin: 0px;
 }
 
 body #site_content {
