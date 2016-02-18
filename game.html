@@ -1,0 +1,222 @@
+<html>
+   <head>
+	
+      <script type="text/javascript">
+	  
+		var lastInputs = [false,false,false,false];
+		
+		var polys = [];
+		
+		var usersPos = [];
+		var upCounter = 0;
+		
+		var myId = -1;
+		var myGroup = "";
+		var myX = 0;
+		var myY = 0;
+		
+		var viewX = 0;
+		var viewY = 0;
+		
+		var orntX = 0;
+		var orntY = 1;
+		
+		var mouseX = 0;
+		var mouseY = 0;
+		
+		bg = new Image();
+		bg.src = 'TestMap.jpg';
+ 
+		game = null;
+		ws = new WebSocket("ws://76.72.20.147:4444");
+		
+		ws.onopen = function()
+               {
+                  // Web Socket is connected, send data using send()
+                  ws.send("Start;");
+				  setTimeout(function(){ 
+				  
+				  ws.send("Join,Group,GameLogic0/0;");
+				  
+				  document.addEventListener('keydown', function(event) {
+				    var changed = false;
+					if(event.keyCode == 87 && lastInputs[0] == false) {
+						lastInputs[0] = true;
+						changed = true;
+					} 
+					if(event.keyCode == 83 && lastInputs[2] == false) {
+						lastInputs[2] = true;
+						changed = true;
+					}
+					if(event.keyCode == 65 && lastInputs[1] == false) {
+						lastInputs[1] = true;
+						changed = true;
+					} 
+					if(event.keyCode == 68) {
+						lastInputs[3] = true;
+						changed = true;
+					}
+					if(changed) {
+						var x = (lastInputs[3]?1:0) - (lastInputs[1]?1:0);
+						var y = (lastInputs[0]?1:0) - (lastInputs[2]?1:0);
+						ws.send("Send,"+myGroup+",Movement,"+x+","+y+";");
+					}
+				   });
+				   document.addEventListener('keyup', function(event) {
+					var changed = false;
+					if(event.keyCode == 87 && lastInputs[0] == true) {
+						lastInputs[0] = false;
+						changed = true;
+					} 
+					if(event.keyCode == 65 && lastInputs[1] == true) {
+						lastInputs[1] = false;
+						changed = true;
+					} 
+					if(event.keyCode == 83 && lastInputs[2] == true) {
+						lastInputs[2] = false;
+						changed = true;
+					} 
+					if(event.keyCode == 68 && lastInputs[3] == true) {
+						lastInputs[3] = false;
+						changed = true;
+					}
+					if(changed) {
+						var x = (lastInputs[3]?1:0) - (lastInputs[1]?1:0);
+						var y = (lastInputs[0]?1:0) - (lastInputs[2]?1:0);
+						ws.send("Send,"+myGroup+",Movement,"+x+","+y+";");
+					}
+				   });
+		 game = document.getElementById("game");
+		 game.onmousedown = function(event) {
+			var x = event.pageX - game.offsetLeft;
+			var y = event.pageY - game.offsetTop;
+			console.log("Mouse: "+x+","+y+" Canvas: "+game.width+","+game.height);
+			if(x < 0.1*game.width) {
+				mouseX = -1;
+			} else if(x > 0.9*game.width) {
+				mouseX = 1;
+			}
+			if(y < 0.1*game.height) {
+				mouseY = 1;
+			} else if(y > 0.9*game.height) {
+				mouseY = -1;
+			}
+			ws.send("Send,"+myGroup+",Movement,"+mouseX+","+mouseY+";");
+		 }
+		 game.onmouseup = function() {
+			if(mouseX != 0 || mouseY != 0) {
+				mouseX = 0;
+				mouseY = 0;
+				ws.send("Send,"+myGroup+",Movement,"+mouseX+","+mouseY+";");
+			}
+		 }
+		 game.onmouseout = function() {
+			if(mouseX != 0 || mouseY != 0) {
+				mouseX = 0;
+				mouseY = 0;
+				ws.send("Send,"+myGroup+",Movement,"+mouseX+","+mouseY+";");
+			}
+		 }
+				   }, 1000);
+				};
+				
+               ws.onmessage = function (evt) 
+               { 
+                  var received_msg = evt.data;
+				  var res = received_msg.split(";");
+				  for (var i = 0; i < res.length; ++i) {
+					
+					var command = res[i].split(",");
+				  
+					switch(command[0]) {
+						case "UserId":               // instruction format: 'UserId,[id];' ex. 'UserId,0;'
+							if (command.length > 1)
+							{	
+								myId = parseInt(command[1]);
+							}
+							break;
+						case "Update":               // instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
+							viewX = myX;
+							viewY = myY;
+							var c = document.getElementById("game");
+							var ctx = c.getContext("2d");
+							ctx.fillStyle = "#000000";
+							ctx.fillRect(0,0,320,240);
+							for(var p = 0; p < polys.length; p++) {
+								ctx.fillStyle = '#ffffff';
+								ctx.beginPath();
+								ctx.moveTo(160+polys[p][0][0]-viewX,120-polys[p][0][1]+viewY);
+								for(var i = 1; i < polys[p].length; i++) {
+									ctx.lineTo(160+polys[p][i][0]-viewX,120-polys[p][i][1]+viewY);
+								}
+								ctx.closePath();
+								ctx.fill();
+							}
+							//ctx.drawImage(bg, 0, 0);
+							if(upCounter >= 9) {
+								usersPos = [];
+								upCounter = 0;
+							} else {upCounter = upCounter + 1;}
+							
+							for (var ui = 1; ui < command.length; ++ui)
+							{
+								var vals = command[ui].split('|');
+	
+								if (myId == vals[0])
+								{
+									myX = parseFloat(vals[1]);
+									myY = parseFloat(vals[2]);
+								} else {
+									var otherX = parseFloat(vals[1]);
+									var otherY = parseFloat(vals[2]);
+									usersPos[vals[0]] = [otherX,otherY];
+								}
+							}
+							
+							for (var p in usersPos) {
+								ctx.fillStyle = "#0000FF";
+									ctx.beginPath();
+									ctx.arc(160+usersPos[p][0]-viewX, 120-usersPos[p][1]+viewY, 4, 0, 2 * Math.PI);
+									ctx.fill();
+							}
+							
+							ctx.fillStyle = "#FF0000";
+							ctx.beginPath();
+							ctx.arc(160+myX-viewX, 120-myY+viewY, 4, 0, 2 * Math.PI);
+							ctx.fill();
+							break;
+						case "Map":
+							polys = JSON.parse(command.join().slice(4));
+							break;
+						case "SetGroup":
+							if (command.length > 1)
+							{
+								myGroup = command[1];
+								usersPos = [];
+							}
+							break;
+					}
+				  }
+               };
+			   
+			ws.onclose = function() {
+							ws.send("Leave,Group,GameLogic;");
+							ws.send("Close;");
+						};
+	  
+         function WebSocketTest()
+         {
+            ws.send("Send");
+         }
+
+      </script>
+		
+   </head>
+   <body>
+   
+    <canvas id="game" width="320" height="240" style="border:1px solid #c3c3c3;display:block;margin:auto;">
+			Your browser does not support the HTML5 canvas tag.
+	</canvas>
+      
+   </body>
+</html>
