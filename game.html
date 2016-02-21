@@ -130,6 +130,7 @@
 							if (command.length > 1)
 							{	
 								myId = parseInt(command[1]);
+								console.log("myId: " + myId);
 							}
 							break;
 						case "Update":               // instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
@@ -149,7 +150,7 @@
 								ctx.closePath();
 								ctx.fill();
 							}
-							//ctx.drawImage(bg, 0, 0);
+
 							if(upCounter >= 9) {
 								usersPos = [];
 								upCounter = 0;
@@ -163,6 +164,7 @@
 								{
 									myX = parseFloat(vals[1]);
 									myY = parseFloat(vals[2]);
+									console.log("myPos: " + myX + ", " + myY);
 								} else {
 									var otherX = parseFloat(vals[1]);
 									var otherY = parseFloat(vals[2]);
@@ -189,6 +191,7 @@
 							if (command.length > 1)
 							{
 								myGroup = command[1];
+								console.log("myGroup: " + command[1]);
 								usersPos = [];
 							}
 							break;
