@@ -120,6 +120,7 @@
                ws.onmessage = function (evt) 
                { 
                   var received_msg = evt.data;
+                  console.log(evt.data);
 				  var res = received_msg.split(";");
 				  for (var i = 0; i < res.length; ++i) {
 					
