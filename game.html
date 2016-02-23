@@ -7,7 +7,7 @@
 		
 		var polys = [];
 		
-		var usersPos = [];
+		var usersPos = {};
 		var upCounter = 0;
 		
 		var myId = -1;
@@ -28,7 +28,7 @@
 		bg.src = 'TestMap.jpg';
  
 		game = null;
-		ws = new WebSocket("ws://76.72.20.147:4444");
+		ws = new WebSocket("ws://192.168.0.188:4444");
 		
 		ws.onopen = function()
                {
@@ -135,6 +135,17 @@
 								myId = parseInt(command[1]);
 							}
 							break;
+						case "ClearUser":               // instruction format: 'UserId,[id];' ex. 'UserId,0;'
+							if (command.length > 1)
+							{	
+								for(var i = 0; i < usersPos.length; ++i) {
+									if(command[1] in usersPos) {
+										delete usersPos[command[1]];
+										i = usersPos.length;
+									}
+								}
+							}
+							break;
 						case "Update":               // instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
 							viewX = myX;
 							viewY = myY;
@@ -153,10 +164,6 @@
 								ctx.fill();
 							}
 							//ctx.drawImage(bg, 0, 0);
-							if(upCounter >= 9) {
-								usersPos = [];
-								upCounter = 0;
-							} else {upCounter = upCounter + 1;}
 							
 							for (var ui = 1; ui < command.length; ++ui)
 							{
