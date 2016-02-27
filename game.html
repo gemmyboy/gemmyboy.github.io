@@ -44,15 +44,15 @@
 						lastInputs[0] = true;
 						changed = true;
 					} 
-					if(event.keyCode == 83 && lastInputs[2] == false) {
-						lastInputs[2] = true;
-						changed = true;
-					}
 					if(event.keyCode == 65 && lastInputs[1] == false) {
 						lastInputs[1] = true;
 						changed = true;
 					} 
-					if(event.keyCode == 68) {
+					if(event.keyCode == 83 && lastInputs[2] == false) {
+						lastInputs[2] = true;
+						changed = true;
+					}
+					if(event.keyCode == 68 && lastInputs[3] == false) {
 						lastInputs[3] = true;
 						changed = true;
 					}
@@ -147,8 +147,7 @@
 							}
 							break;
 						case "Update":               // instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
-							viewX = myX;
-							viewY = myY;
+							console.log("Updating...");
 							var c = document.getElementById("game");
 							var ctx = c.getContext("2d");
 							ctx.fillStyle = "#000000";
@@ -173,6 +172,8 @@
 								{
 									myX = parseFloat(vals[1]);
 									myY = parseFloat(vals[2]);
+									viewX = myX;
+									viewY = myY;
 								} else {
 									var otherX = parseFloat(vals[1]);
 									var otherY = parseFloat(vals[2]);
