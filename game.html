@@ -148,6 +148,10 @@
 							if(command.length > 1)
 							{
 								$('#chat').val($('#chat').val() + "\n" + command[1])
+								var t = $('#chat');
+								if(t.length){
+									t.scrollTop(t[0].scrollHeight - t.height());
+								}
 							}
 						case "ClearUser":               // instruction format: 'UserId,[id];' ex. 'UserId,0;'
 							if (command.length > 1)
@@ -253,7 +257,7 @@
 			</canvas>
 			<br />
 			<center>
-				<textarea id="chat" class="form-control" style="width:50%; max-height:30%; max-width: 50%; height: 200px; " readonly></textarea> <br />
+				<textarea id="chat" class="form-control" style="width:50%; max-height:30%; max-width: 50%; height: 200px; overflow-y: scroll;" readonly></textarea> <br />
 				<input id="message" class=form-control type="text" style="width:50%;" placeholder="Chat Message" />
 				
 			</center>
