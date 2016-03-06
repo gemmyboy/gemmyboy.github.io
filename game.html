@@ -147,7 +147,12 @@
 						case "Global":				//instruction format: 'Global,message;'
 							if(command.length > 1)
 							{
-								$('#chat').val($('#chat').val() + "\n" + command[1])
+								var thing = command[1]
+								for(var iter = 2; iter < command.length; iter++) {
+									thing = thing + "," + command[iter];
+									
+								}
+								$('#chat').val($('#chat').val() + "\n" + thing)
 								var t = $('#chat');
 								if(t.length){
 									t.scrollTop(t[0].scrollHeight - t.height());
