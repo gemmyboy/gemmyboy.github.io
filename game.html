@@ -18,6 +18,8 @@
 		var usersPos = {};
 		var upCounter = 0;
 		
+		var effects = [];
+		
 		var myId = -1;
 		var myGroup = "";
 		var myX = 0;
@@ -97,34 +99,14 @@
 				   });
 		 game = document.getElementById("game");
 		 game.onmousedown = function(event) {
-			var x = event.pageX - game.offsetLeft;
-			var y = event.pageY - game.offsetTop;
-			console.log("Mouse: "+x+","+y+" Canvas: "+game.width+","+game.height);
-			if(x < 0.1*game.width) {
-				mouseX = -1;
-			} else if(x > 0.9*game.width) {
-				mouseX = 1;
-			}
-			if(y < 0.1*game.height) {
-				mouseY = 1;
-			} else if(y > 0.9*game.height) {
-				mouseY = -1;
-			}
-			ws.send("Send,"+myGroup+",Movement,"+mouseX+","+mouseY+";");
-		 }
-		 game.onmouseup = function() {
-			if(mouseX != 0 || mouseY != 0) {
-				mouseX = 0;
-				mouseY = 0;
-				ws.send("Send,"+myGroup+",Movement,"+mouseX+","+mouseY+";");
-			}
-		 }
-		 game.onmouseout = function() {
-			if(mouseX != 0 || mouseY != 0) {
-				mouseX = 0;
-				mouseY = 0;
-				ws.send("Send,"+myGroup+",Movement,"+mouseX+","+mouseY+";");
-			}
+			var x = event.pageX - game.offsetLeft - (160+myX-viewX);
+			var y = event.pageY - game.offsetTop - (120-myY+viewY);
+			
+			var r = Math.sqrt(x*x + y*y);
+			x = x / r;
+			y = -y / r;
+			console.log("Shoot Dir: "+x+","+y);
+			ws.send("Send,"+myGroup+",Shoot,"+x+","+y+";");
 		 }
 				   }, 1000);
 				};
@@ -211,10 +193,47 @@
 									ctx.fill();
 							}
 							
+							var ei = 0;
+							var t = new Date();
+							ctx.fillStyle = "#009900";
+							while (ei < effects.length) {
+								if(effects[ei][6] < t) {
+								    effects.splice(ei,1);
+								} else {
+									var time = effects[ei][5] - effects[ei][6].getTime() + t.getTime();
+									var eX = effects[ei][0] + time/1000 * effects[ei][3];
+									var eY = effects[ei][1] + time/1000 * effects[ei][4];
+
+									ctx.beginPath();
+									ctx.arc(160+eX-viewX, 120-eY+viewY, effects[ei][2], 0, 2 * Math.PI);
+									ctx.fill();
+									ei += 1;
+								}
+							}
+							
 							ctx.fillStyle = "#FF0000";
 							ctx.beginPath();
 							ctx.arc(160+myX-viewX, 120-myY+viewY, 4, 0, 2 * Math.PI);
 							ctx.fill();
+							break;
+							case "Effects":               // instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
+							
+							for (var ui = 1; ui < command.length; ++ui)
+							{
+								var vals = command[ui].split('|');
+	
+								var eR = parseFloat(vals[0]);
+								var eX = parseFloat(vals[1]);
+								var eY = parseFloat(vals[2]);
+								var eVx = parseFloat(vals[3]);
+								var eVy = parseFloat(vals[4]);
+								var dur = parseFloat(vals[5])*1000;
+								var end = new Date();
+								end.setMilliseconds(end.getMilliseconds()+dur);
+								
+								effects.push([eX,eY,eR,eVx,eVy,dur,end]);
+								
+							}
 							break;
 						case "Map":
 							polys = JSON.parse(command.join().slice(4));
