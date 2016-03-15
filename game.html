@@ -26,11 +26,12 @@
 				this.img = new Image();
 
 				this.UpdateAni = function () {
+				    var cF = this.current_Frame / 4;
 				    if (lastInputs[0] == true || 
                         lastInputs[1] == true ||
                         lastInputs[2] == true ||
                         lastInputs[3] == true) {
-				        if (this.current_frame > 2) { this.current_frame = 0; }
+				        if (this.current_frame > 3*4) { this.current_frame = 0; }
 				        this.current_frame += 1;
 				    }
 				};
@@ -47,7 +48,7 @@
 				    this.UpdateAni();
 				    canvas.drawImage(
                         this.img,
-                        ((this.current_frame * this.frame_X)/ 2),
+                        ((Math.floor(this.current_frame/4) * this.frame_X)/ 2),
                         this.frame_Y,
                         32,
                         64,
