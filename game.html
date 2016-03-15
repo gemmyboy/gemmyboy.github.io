@@ -20,6 +20,21 @@
 				this.Y = 64.0;						//Y Coords on Canvas
 				this.color = '#0000ff';			    //Color of player if drawing Polygons
 				this.group = "";
+				this.frame_Y = 64.0;
+				this.frame_X = 64.0;
+				this.current_frame = 0;
+				this.img = new Image();
+
+				this.UpdateAni = function () {
+				    if (lastInputs[0] == true || 
+                        lastInputs[1] == true ||
+                        lastInputs[2] == true ||
+                        lastInputs[3] == true) {
+				        if (this.current_frame > 2) { this.current_frame = 0; }
+				        this.current_frame += 1;
+				    }
+				};
+				this.interval_timer = 0;
 				
 				this.DrawPlayer = function(canvas, color) {
 					canvas.fillStyle = color || this.color;
@@ -27,7 +42,21 @@
 					canvas.arc(this.X, this.Y, 4, 0, 2 * Math.PI);
 					canvas.fill();
 				};//End DrawPlayer()
-				
+
+				this.DrawPlayerImage = function (canvas) {
+				    this.UpdateAni();
+				    canvas.drawImage(
+                        this.img,
+                        ((this.current_frame * this.frame_X)/ 2),
+                        this.frame_Y,
+                        32,
+                        64,
+                        (this.X - 16),
+                        (this.Y - 45),
+                        32,
+                        64);
+				};//End DrawPlayer()
+
 			}//End Player()
 			
 			//Map Object Template
@@ -86,8 +115,9 @@
 			//------------------------------------------------------------------
 			//GLOBAL VARS
 			var ws = new WebSocket("ws://76.72.20.147:4444");		    //Websocket Object
-			var player = new Player();								//Current Client User
-				player.color = '#ff0000';							//Current player is red; Everyone else is blue
+			var player = new Player();								    //Current Client User
+				player.color = '#ff0000';							    //Current player is red; Everyone else is blue
+				player.img.src = 'graphics/ClosedNatureMan.png';        //Player image
 			
 			var players = [];										//All other players on the map --  NOTE: Associative Array
 			var map = new Map(640, 420, '#000000', '#ffffff');		//Map Object
@@ -95,7 +125,7 @@
 			
 			var lastInputs = [false,false,false,false];
 			
-		
+		    
 		
 		
 			//------------------------------------------------------------------
@@ -147,7 +177,8 @@
                 map.DrawBackgroundColor(canvas)             //BG Color - Typically just Black
 				map.DrawBGImage(canvas);                    //BG Image
 				map.DrawPolygons(canvas);                   //Polygons
-				player.DrawPlayer(canvas, player.color);    //Current Player
+				player.DrawPlayerImage(canvas);             //Player only
+				//player.DrawPlayer(canvas, player.color);    //Current Player
 				for (var key in players) {             //Then all other Players
 				    if (key == undefined) continue;
                     else players[key].DrawPlayer(canvas);
@@ -172,21 +203,26 @@
 				//Setup the Keydown Event's which are sent to the Server
 				document.addEventListener('keydown', function(event) {
 				    var changed = false;
+				    player.moving = true;
 					if(event.keyCode == 87 && lastInputs[2] == false) {		//W
 						lastInputs[2] = true;
 						changed = true;
+                        player.frame_Y = 192;
 					} 
 					if(event.keyCode == 65 && lastInputs[1] == false) {		//A
 						lastInputs[1] = true;
 						changed = true;
+						player.frame_Y = 128;
 					} 
 					if(event.keyCode == 83 && lastInputs[0] == false) {		//S
 						lastInputs[0] = true;
 						changed = true;
+						player.frame_Y = 0;
 					}
 					if(event.keyCode == 68 && lastInputs[3] == false) {		//D
 						lastInputs[3] = true;
 						changed = true;
+						player.frame_Y = 64;
 					}
 					if(changed) {
 						var x = (lastInputs[3]?1:0) - (lastInputs[1]?1:0);	//Incase A & D are pressed at the same-time, player doesn't actually move
@@ -198,6 +234,7 @@
 				   //Samething as above except for Keyup Events
 				   document.addEventListener('keyup', function(event) {
 					var changed = false;
+					player.moving = false;
 					if(event.keyCode == 87 && lastInputs[2] == true) {		//W
 						lastInputs[2] = false;
 						changed = true;
