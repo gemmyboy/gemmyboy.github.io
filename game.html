@@ -15,10 +15,10 @@
 			
 			//Player Object Template
 			function Player() {
-				this.GameID = "-1";				//Player ID
+				this.GameID = "-1";				    //Player ID
 				this.X = 64.0;						//X Coords on Canvas
 				this.Y = 64.0;						//Y Coords on Canvas
-				this.color = '#0000ff';			//Color of player if drawing Polygons
+				this.color = '#0000ff';			    //Color of player if drawing Polygons
 				this.group = "";
 				
 				this.DrawPlayer = function(canvas, color) {
@@ -148,8 +148,9 @@
 				map.DrawBGImage(canvas);                    //BG Image
 				map.DrawPolygons(canvas);                   //Polygons
 				player.DrawPlayer(canvas, player.color);    //Current Player
-				for(var key in players){             //Then all other Players
-					players[key].DrawPlayer(canvas);
+				for (var key in players) {             //Then all other Players
+				    if (key == undefined) continue;
+                    else players[key].DrawPlayer(canvas);
 				}//End for
 
 			}//End Update
@@ -237,41 +238,52 @@
 					var cmd = cmds[iter].split(",");
 					
 					switch(cmd[0]) {
-					//UserId -:
-					//	Used as the Setup from the GS to feed the Client in kind of initial Meta-Data
-					case "UserId":					// instruction format: 'UserId,[id];' ex. 'UserId,0;'
-						if (cmd.length > 1)
-						{	
-							console.log("PlayerID:" + cmd[1]);
-							player.GameID = cmd[1];
-						}
-						break;
-					//Global -:
-					//	Used for the ChatServer to output incoming messages to the Browser
-					case "Global":					// instruction format: 'Global,message;'
-						Global(cmd);
-						break;
-					//Update -:
-					//	This little bitch gets called like a crazy person. It handles everything dealing in moving the
-					//	player, drawing players to the screen, etc....
-					case "Update":					// instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
-						console.log("Updating...");
-						Update(cmd, game);
-						break;
-					//Map -:
-					//	Means we're receiving Polygon mapping data to put on the screen.
-					case "Map":
-						console.log(cmd);
-						cmd.shift();
-						map.LoadPolygons(cmd.join());
-						break;
-					//SetGroup -:
-					//	Current Player Group
-					case "SetGroup":
-						if(cmd.length > 1){
-							player.group = cmd[1];
-							
-						}//End if
+					    //UserId -:
+					    //	Used as the Setup from the GS to feed the Client in kind of initial Meta-Data
+					    case "UserId":					// instruction format: 'UserId,[id];' ex. 'UserId,0;'
+						    if (cmd.length > 1)
+						    {	
+							    console.log("PlayerID:" + cmd[1]);
+							    player.GameID = cmd[1];
+						    }
+						    break;
+					    //Global -:
+					    //	Used for the ChatServer to output incoming messages to the Browser
+					    case "Global":					// instruction format: 'Global,message;'
+						    Global(cmd);
+						    break;
+					    //Update -:
+					    //	This little bitch gets called like a crazy person. It handles everything dealing in moving the
+					    //	player, drawing players to the screen, etc....
+					    case "Update":					// instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
+						    console.log("Updating...");
+						    Update(cmd, game);
+						    break;
+					    //Map -:
+					    //	Means we're receiving Polygon mapping data to put on the screen.
+					    case "Map":
+						    console.log(cmd);
+						    cmd.shift();
+						    map.LoadPolygons(cmd.join());
+						    break;
+					    //SetGroup -:
+					    //	Current Player Group
+					    case "SetGroup":
+					        if (cmd.length > 1) {
+					            player.group = cmd[1];
+
+					        }//End if
+					        break;
+					    case "ClearUser":
+					        if (cmd.length > 1) {
+					            delete players[cmd[1]];
+					        }
+					        break;
+					    case "":
+					        break;
+					    default:
+					        console.log("Huh?-: ", cmd);
+					        break;
 					}//End switch
 					
 						
