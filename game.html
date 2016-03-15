@@ -105,8 +105,10 @@
 				if(cmd.length > 1)
 				{
 					var thing = cmd[1]
-					for(var iter = 1; iter < cmd.length; iter++) {
-						thing = thing + "," + cmd[iter];
+					if(cmd.length > 2) {
+						for(var iter = 1; iter < cmd.length; iter++) {
+							thing = thing + "," + cmd[iter];
+						}
 					}
 					$('#chat').val($('#chat').val() + "\n" + thing)
 					var t = $('#chat');
