@@ -22,7 +22,7 @@
 				this.group = "";
 				
 				this.DrawPlayer = function(canvas, color) {
-					canvas.fillStyle = color || this.player_color;
+					canvas.fillStyle = color || this.color;
 					canvas.beginPath();
 					canvas.arc(this.X, this.Y, 4, 0, 2 * Math.PI);
 					canvas.fill();
@@ -148,7 +148,7 @@
 				map.DrawBGImage(canvas);                    //BG Image
 				map.DrawPolygons(canvas);                   //Polygons
 				player.DrawPlayer(canvas, player.color);    //Current Player
-				for(var key in players.length){             //Then all other Players
+				for(var key in players){             //Then all other Players
 					players[key].DrawPlayer(canvas);
 				}//End for
 
