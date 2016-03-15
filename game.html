@@ -9,258 +9,288 @@
 		
 		<link href="local.css" rel="stylesheet" />
 		
-      <script type="text/javascript">
-	  
-		var lastInputs = [false,false,false,false];
 		
-		var polys = [];
+		<script>
+			//Rewriting this because I have literally zero clue in what the hell the other client was doing 'lol'
+			
+			//Player Object Template
+			function Player() {
+				this.GameID = "-1";				//Player ID
+				this.X = 64.0;						//X Coords on Canvas
+				this.Y = 64.0;						//Y Coords on Canvas
+				this.color = '#0000ff';			//Color of player if drawing Polygons
+				this.group = "";
+				
+				this.DrawPlayer = function(canvas, color) {
+					canvas.fillStyle = color || this.player_color;
+					canvas.beginPath();
+					canvas.arc(this.X, this.Y, 4, 0, 2 * Math.PI);
+					canvas.fill();
+				};//End DrawPlayer()
+				
+			}//End Player()
+			
+			//Map Object Template
+			function Map (x, y, bg_color, poly_color){
+				this.polygons = {};																	//List of Polygons like { polygonObj, polygonObj, polygonObj.... }
+				this.global_x = x;																	//Global Canvas X
+				this.global_y = y;																	//Global Canvas Y
+				this.bg_color = bg_color;															//Background Color for Drawing Polygons
+				this.poly_color = poly_color;														//Color of the actual Polygon
+				this.bg_image = "";                                                                 //Image of the BG
+				this.draw_poly = false;                                                             //Draw Polygon's on screen or not
+
+				//Loads in Polygons
+				//	cmd is a string 
+				this.LoadPolygons = function(cmd) {
+					t_poly = JSON.parse(cmd);
+					this.polygons = t_poly;
+				}//End LoadPolygons
+
+				this.LoadMapImage = function (bg) {
+				    this.bg_image = bg;
+				}//End LoadMapImage
+				
+				//Draws all Polygons to the Canvas
+				this.DrawPolygons = function (drawable_canvas) {
+				    if (!this.draw_poly) return;
+					for(var i = 0; i < this.polygons.length; i++){
+						drawable_canvas.fillStyle = this.poly_color;												//Poly Draw color
+						drawable_canvas.beginPath();																//Start Drawing Poly
+						drawable_canvas.moveTo(this.polygons[i][0][0], this.polygons[i][0][1])						//Start at first point in selected Polygon
+						for(var j = 1; j < this.polygons[i].length; j++) {												//Loop through every-other point in Polygon and Output it
+							drawable_canvas.lineTo(this.polygons[i][j][0],this.polygons[i][j][1]);						//Actual Draw
+						}
+						drawable_canvas.closePath();																//Finish drawing Polygon
+						drawable_canvas.fill();																		//Fill to make it easier to read
+					}//End for
+				};
+				
+				//Draws all images to the Canvas
+				this.DrawBGImage = function (drawable_canvas) {
+				    var img = new Image();
+				    img.src = this.bg_image;
+				    drawable_canvas.drawImage(img, 0, 0);
+				};
+
+				this.DrawBackgroundColor = function (drawable_canvas) {
+				    drawable_canvas.fillStyle = this.bg_color;
+				    drawable_canvas.fillRect(0, 0, this.global_x, this.global_y);
+				};
+
+			}//End Map()
+			
+			
+
 		
-		var usersPos = {};
-		var upCounter = 0;
+			//------------------------------------------------------------------
+			//GLOBAL VARS
+			var ws = new WebSocket("ws://127.0.0.1:4444");		    //Websocket Object
+			var player = new Player();								//Current Client User
+				player.color = '#ff0000';							//Current player is red; Everyone else is blue
+			
+			var players = [];										//All other players on the map --  NOTE: Associative Array
+			var map = new Map(640, 420, '#000000', '#ffffff');		//Map Object
+			map.LoadMapImage("graphics/game_background.png");
+			
+			var lastInputs = [false,false,false,false];
+			
 		
-		var effects = [];
 		
-		var myId = -1;
-		var myGroup = "";
-		var myX = 0;
-		var myY = 0;
 		
-		var viewX = 0;
-		var viewY = 0;
-		
-		var orntX = 0;
-		var orntY = 1;
-		
-		var mouseX = 0;
-		var mouseY = 0;
-		
-		bg = new Image();
-		bg.src = 'TestMap.jpg';
- 
-		game = null;
-		ws = new WebSocket("ws://76.72.20.147:4444");
-		
-		ws.onopen = function()
-               {
-                  // Web Socket is connected, send data using send()
-                  ws.send("Start;");
-				  setTimeout(function(){ 
-				  
-				  ws.send("Join,Group,GameLogic0/0;");
-				  ws.send("Join,Group,ChatServer;")
-				  
-				  document.addEventListener('keydown', function(event) {
+			//------------------------------------------------------------------
+			//HELPER FUNCTIONS
+			//Used for ChatServer
+			function Global(cmd) {
+				if(command.length > 1)
+				{
+					var thing = command[1]
+					for(var iter = 2; iter < command.length; iter++) {
+						thing = thing + "," + command[iter];
+					}
+					$('#chat').val($('#chat').val() + "\n" + thing)
+					var t = $('#chat');
+					if(t.length){
+						t.scrollTop(t[0].scrollHeight - t.height());
+					}
+				}
+			}//End Global()
+			
+			
+			//Called on every single Update Call
+			function Update(cmd, canvas) {
+				//Step 1: Process Update Data appropriately
+				for(var dataIter = 1; dataIter < cmd.length; dataIter++){
+					var cmdParts = cmd[dataIter].split('|');
+					
+					if(cmdParts[0] == player.GameID){		//Check for Current Client-Player
+						player.X = parseFloat(cmdParts[1]);
+						player.Y = parseFloat(cmdParts[2]);
+					} else {								//Check for Any other Player
+						if(players[cmdParts[0]] == null) {	//If current player just joined
+							players[cmdParts[0]] = new Player();
+							players[cmdParts[0]].GameID = cmdParts[0];
+							players[cmdParts[0]].X = cmdParts[1]
+							players[cmdParts[0]].Y = cmdParts[2]
+							//Do anything you'd want to do for a new player here
+							
+						} else {
+							players[cmdParts[0]].X = cmdParts[1]
+							players[cmdParts[0]].Y = cmdParts[2]
+						}//End else						
+					}//End else
+				}//End for
+				
+			    //Step 2: Re-Draw Canvas with new associated data
+                map.DrawBackgroundColor(canvas)             //BG Color - Typically just Black
+				map.DrawBGImage(canvas);                    //BG Image
+				map.DrawPolygons(canvas);                   //Polygons
+				player.DrawPlayer(canvas, player.color);    //Current Player
+				for(var key in players.length){             //Then all other Players
+					players[key].DrawPlayer(canvas);
+				}//End for
+
+			}//End Update
+			
+			
+			
+			//------------------------------------------------------------------
+			//Starting the connection and setting up all input event handling, etc...
+			ws.onopen = function()
+			{
+				ws.send("Start;")
+				
+				//Make Sure this doesn't try to endlessly send data, the GS could be down
+				setTimeout(function(){
+				
+				ws.send("Join,Group,GameLogic0/0;");
+				ws.send("Join,Group,ChatServer;")
+				
+				//Setup the Keydown Event's which are sent to the Server
+				document.addEventListener('keydown', function(event) {
 				    var changed = false;
-					if(event.keyCode == 87 && lastInputs[0] == false) {
-						lastInputs[0] = true;
+					if(event.keyCode == 87 && lastInputs[2] == false) {		//W
+						lastInputs[2] = true;
 						changed = true;
 					} 
-					if(event.keyCode == 65 && lastInputs[1] == false) {
+					if(event.keyCode == 65 && lastInputs[1] == false) {		//A
 						lastInputs[1] = true;
 						changed = true;
 					} 
-					if(event.keyCode == 83 && lastInputs[2] == false) {
-						lastInputs[2] = true;
+					if(event.keyCode == 83 && lastInputs[0] == false) {		//S
+						lastInputs[0] = true;
 						changed = true;
 					}
-					if(event.keyCode == 68 && lastInputs[3] == false) {
+					if(event.keyCode == 68 && lastInputs[3] == false) {		//D
 						lastInputs[3] = true;
 						changed = true;
 					}
 					if(changed) {
-						var x = (lastInputs[3]?1:0) - (lastInputs[1]?1:0);
-						var y = (lastInputs[0]?1:0) - (lastInputs[2]?1:0);
-						ws.send("Send,"+myGroup+",Movement,"+x+","+y+";");
+						var x = (lastInputs[3]?1:0) - (lastInputs[1]?1:0);	//Incase A & D are pressed at the same-time, player doesn't actually move
+						var y = (lastInputs[0]?1:0) - (lastInputs[2]?1:0);	//Same as above except W & S
+						ws.send("Send,"+player.group+",Physics,Movement,"+x+","+y+";");
 					}
-				   });
+				   });//End keydown
+				   
+				   //Samething as above except for Keyup Events
 				   document.addEventListener('keyup', function(event) {
 					var changed = false;
-					if(event.keyCode == 87 && lastInputs[0] == true) {
-						lastInputs[0] = false;
-						changed = true;
-					} 
-					if(event.keyCode == 65 && lastInputs[1] == true) {
-						lastInputs[1] = false;
-						changed = true;
-					} 
-					if(event.keyCode == 83 && lastInputs[2] == true) {
+					if(event.keyCode == 87 && lastInputs[2] == true) {		//W
 						lastInputs[2] = false;
 						changed = true;
 					} 
-					if(event.keyCode == 68 && lastInputs[3] == true) {
+					if(event.keyCode == 65 && lastInputs[1] == true) {		//A
+						lastInputs[1] = false;
+						changed = true;
+					} 
+					if(event.keyCode == 83 && lastInputs[0] == true) {		//S
+						lastInputs[0] = false;
+						changed = true;
+					} 
+					if(event.keyCode == 68 && lastInputs[3] == true) {		//D
 						lastInputs[3] = false;
 						changed = true;
 					}
 					if(changed) {
 						var x = (lastInputs[3]?1:0) - (lastInputs[1]?1:0);
 						var y = (lastInputs[0]?1:0) - (lastInputs[2]?1:0);
-						ws.send("Send,"+myGroup+",Movement,"+x+","+y+";");
+						ws.send("Send,"+player.group+",Physics,Movement,"+x+","+y+";");
 					}
-				   });
-		 game = document.getElementById("game");
-		 game.onmousedown = function(event) {
-			var x = event.pageX - game.offsetLeft - (160+myX-viewX);
-			var y = event.pageY - game.offsetTop - (120-myY+viewY);
+				   });//End keyup
+				});//End timeout
+			}//End onopen()
 			
-			var r = Math.sqrt(x*x + y*y);
-			x = x / r;
-			y = -y / r;
-			console.log("Shoot Dir: "+x+","+y);
-			ws.send("Send,"+myGroup+",Shoot,"+x+","+y+";");
-		 }
-				   }, 1000);
-				};
+			
+			
+			
+			
+			//------------------------------------------------------------------
+			//Any time data is received in the browser, it's sent here.
+			ws.onmessage = function(event) {
+				var data = event.data;
+				var cmds = data.split(";");
+				var game = document.getElementById("game").getContext("2d");
 				
-               ws.onmessage = function (evt) 
-               { 
-                  var received_msg = evt.data;
-				  var res = received_msg.split(";");
-				  for (var i = 0; i < res.length; ++i) {
+				for(var iter = 0; iter < cmds.length; iter++){
+					var cmd = cmds[iter].split(",");
 					
-					var command = res[i].split(",");
-				  
-					switch(command[0]) {
-						case "UserId":               // instruction format: 'UserId,[id];' ex. 'UserId,0;'
-							if (command.length > 1)
-							{	
-								myId = parseInt(command[1]);
-							}
-							break;
-						case "Global":				//instruction format: 'Global,message;'
-							if(command.length > 1)
-							{
-								var thing = command[1]
-								for(var iter = 2; iter < command.length; iter++) {
-									thing = thing + "," + command[iter];
-									
-								}
-								$('#chat').val($('#chat').val() + "\n" + thing)
-								var t = $('#chat');
-								if(t.length){
-									t.scrollTop(t[0].scrollHeight - t.height());
-								}
-							}
-						case "ClearUser":               // instruction format: 'UserId,[id];' ex. 'UserId,0;'
-							if (command.length > 1)
-							{	
-								for(var i = 0; i < usersPos.length; ++i) {
-									if(command[1] in usersPos) {
-										delete usersPos[command[1]];
-										i = usersPos.length;
-									}
-								}
-							}
-							break;
-						case "Update":               // instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
-							console.log("Updating...");
-							var c = document.getElementById("game");
-							var ctx = c.getContext("2d");
-							ctx.fillStyle = "#000000";
-							ctx.fillRect(0,0,320,240);
-							for(var p = 0; p < polys.length; p++) {
-								ctx.fillStyle = '#ffffff';
-								ctx.beginPath();
-								ctx.moveTo(160+polys[p][0][0]-viewX,120-polys[p][0][1]+viewY);
-								for(var i = 1; i < polys[p].length; i++) {
-									ctx.lineTo(160+polys[p][i][0]-viewX,120-polys[p][i][1]+viewY);
-								}
-								ctx.closePath();
-								ctx.fill();
-							}
-							//ctx.drawImage(bg, 0, 0);
+					switch(cmd[0]) {
+					//UserId -:
+					//	Used as the Setup from the GS to feed the Client in kind of initial Meta-Data
+					case "UserId":					// instruction format: 'UserId,[id];' ex. 'UserId,0;'
+						if (cmd.length > 1)
+						{	
+							console.log("PlayerID:" + cmd[1]);
+							player.GameID = cmd[1];
+						}
+						break;
+					//Global -:
+					//	Used for the ChatServer to output incoming messages to the Browser
+					case "Global":					// instruction format: 'Global,message;'
+						Global(cmd);
+						break;
+					//Update -:
+					//	This little bitch gets called like a crazy person. It handles everything dealing in moving the
+					//	player, drawing players to the screen, etc....
+					case "Update":					// instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
+						console.log("Updating...");
+						Update(cmd, game);
+						break;
+					//Map -:
+					//	Means we're receiving Polygon mapping data to put on the screen.
+					case "Map":
+						console.log(cmd);
+						cmd.shift();
+						map.LoadPolygons(cmd.join());
+						break;
+					//SetGroup -:
+					//	Current Player Group
+					case "SetGroup":
+						if(cmd.length > 1){
+							player.group = cmd[1];
 							
-							for (var ui = 1; ui < command.length; ++ui)
-							{
-								var vals = command[ui].split('|');
-	
-								if (myId == vals[0])
-								{
-									myX = parseFloat(vals[1]);
-									myY = parseFloat(vals[2]);
-									viewX = myX;
-									viewY = myY;
-								} else {
-									var otherX = parseFloat(vals[1]);
-									var otherY = parseFloat(vals[2]);
-									usersPos[vals[0]] = [otherX,otherY];
-								}
-							}
-							
-							for (var p in usersPos) {
-								ctx.fillStyle = "#0000FF";
-									ctx.beginPath();
-									ctx.arc(160+usersPos[p][0]-viewX, 120-usersPos[p][1]+viewY, 4, 0, 2 * Math.PI);
-									ctx.fill();
-							}
-							
-							var ei = 0;
-							var t = new Date();
-							ctx.fillStyle = "#009900";
-							while (ei < effects.length) {
-								if(effects[ei][6] < t) {
-								    effects.splice(ei,1);
-								} else {
-									var time = effects[ei][5] - effects[ei][6].getTime() + t.getTime();
-									var eX = effects[ei][0] + time/1000 * effects[ei][3];
-									var eY = effects[ei][1] + time/1000 * effects[ei][4];
-
-									ctx.beginPath();
-									ctx.arc(160+eX-viewX, 120-eY+viewY, effects[ei][2], 0, 2 * Math.PI);
-									ctx.fill();
-									ei += 1;
-								}
-							}
-							
-							ctx.fillStyle = "#FF0000";
-							ctx.beginPath();
-							ctx.arc(160+myX-viewX, 120-myY+viewY, 4, 0, 2 * Math.PI);
-							ctx.fill();
-							break;
-							case "Effects":               // instruction format: 'Update,[id]|[x]|[y],[id2]|[x2]|[y2]...;' ex. 'Update,0|0|0,1|0|1,2|1|0;'
-							
-							for (var ui = 1; ui < command.length; ++ui)
-							{
-								var vals = command[ui].split('|');
-	
-								var eR = parseFloat(vals[0]);
-								var eX = parseFloat(vals[1]);
-								var eY = parseFloat(vals[2]);
-								var eVx = parseFloat(vals[3]);
-								var eVy = parseFloat(vals[4]);
-								var dur = parseFloat(vals[5])*1000;
-								var end = new Date();
-								end.setMilliseconds(end.getMilliseconds()+dur);
-								
-								effects.push([eX,eY,eR,eVx,eVy,dur,end]);
-								
-							}
-							break;
-						case "Map":
-							polys = JSON.parse(command.join().slice(4));
-							break;
-						case "SetGroup":
-							if (command.length > 1)
-							{
-								myGroup = command[1];
-								usersPos = [];
-							}
-							break;
-					}
-				  }
-               };
-			   
-			ws.onclose = function() {
-							ws.send("Leave,Group,GameLogic;");
-							ws.send("Close;");
-						};
-	  
-         function WebSocketTest()
-         {
-            ws.send("Send");
-         }
-
-      </script>
+						}//End if
+					}//End switch
+					
+						
+				}//End for
+			} //End onmessage()
+				
+			
 		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		</script>
    </head>
    <body>
 		<div id="site_header" class="row">
@@ -275,16 +305,33 @@
 			</div>
 		</div>
 		<div id="site_content">
-			<br />
-			<canvas id="game" width="320" height="240" style="display:block;margin:auto;">
-					Your browser does not support the HTML5 canvas tag.
-			</canvas>
-			<br />
-			<center>
-				<textarea id="chat" class="form-control" style="width:50%; max-height:30%; max-width: 50%; height: 200px; overflow-y: scroll;" readonly></textarea> <br />
-				<input id="message" class=form-control type="text" style="width:50%;" placeholder="Chat Message" />
-				
-			</center>
+            <div class="row" style="margin: 0px;">
+                <div class="col-md-3" style="padding: 10px; border-radius: 3px 4px; background-color: #133a26">
+                    <center>
+                    <div style="background-color: #014421; border-radius: 3px 4px; color: white; padding: 10px; height: 100%;">
+                    </div>
+                    </center>
+                </div>
+			    <div class="col-md-6">
+                    <center>
+                        <br />
+			            <canvas id="game" width="640" height="640" style="display:block;margin:0%;">
+					            Your browser does not support the HTML5 canvas tag.
+			            </canvas>
+                        <br />
+                    
+			            <textarea id="chat" class="form-control" style="max-height:15%; max-width: 640px; height: 200px;" readonly></textarea> <br />
+				        <input id="message" class=form-control type="text" style="width:640px;" placeholder="Chat Message" />
+			        </center>
+                </div>
+                <div class="col-md-3" style="padding: 10px; border-radius: 3px 4px; background-color: #133a26">
+                    <div style="background-color: #014421; border-radius: 3px 4px; color: white; padding: 10px; height: 100%; text-align: right;">
+                        <center><h3>Dev Tools</h3></center>
+                        <h4>Draw Polygons: <input id="DrawPoly" type="checkbox" /></h4>
+
+                    </div>
+                </div>
+            </div>
 		</div>
    </body>
 </html>
@@ -296,9 +343,13 @@
 				$('#message').val("");
 			}
 		});
-	
-	
-	
-	
+
+		$('#DrawPoly').change(function () {
+		    if ($('#DrawPoly').is(":checked")) {
+		        map.draw_poly = true;
+		    } else {
+		        map.draw_poly = false;
+		    }
+		});
 	});
 </script>
