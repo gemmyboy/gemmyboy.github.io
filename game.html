@@ -125,15 +125,15 @@
 				for(var dataIter = 1; dataIter < cmd.length; dataIter++){
 					var cmdParts = cmd[dataIter].split('|');
 					
-					if(cmdParts[0] == player.GameID){		//Check for Current Client-Player
+					if(cmdParts[0].toString() == player.GameID){	                	//Check for Current Client-Player
 						player.X = parseFloat(cmdParts[1]);
 						player.Y = parseFloat(cmdParts[2]);
-					} else {								//Check for Any other Player
-						if(players[cmdParts[0]] == null) {	//If current player just joined
-							players[cmdParts[0]] = new Player();
-							players[cmdParts[0]].GameID = cmdParts[0];
-							players[cmdParts[0]].X = cmdParts[1]
-							players[cmdParts[0]].Y = cmdParts[2]
+					} else {								                            //Check for Any other Player
+					    if (players[cmdParts[0].toString()] == undefined) {	            //If current player just joined
+					        players[cmdParts[0].toString()] = new Player();
+					        players[cmdParts[0].toString()].GameID = cmdParts[0].toString();
+					        players[cmdParts[0].toString()].X = cmdParts[1]
+					        players[cmdParts[0].toString()].Y = cmdParts[2]
 							//Do anything you'd want to do for a new player here
 							
 						} else {
@@ -318,32 +318,27 @@
 				Dev-Site
 			</div>
 		</div>
-		<div id="site_content">
-            <div class="row" style="margin: 0px;">
-                <div class="col-md-3" style="padding: 10px; border-radius: 3px 4px; background-color: #133a26">
-                    <center>
-                    <div style="background-color: #014421; border-radius: 3px 4px; color: white; padding: 10px; height: 100%;">
-                    </div>
-                    </center>
+		<div id="site_content" class="row" style="position:absolute; margin: 0px;">
+            <div class="col-sm-3" style="padding: 10px; border-radius: 3px 4px; background-color: #133a26;">
+                <div style="background-color: #014421; border-radius: 3px 4px; color: white; padding: 10px; height: 97.6%;">
                 </div>
-			    <div class="col-md-6">
-                    <center>
-                        <br />
-			            <canvas id="game" width="640" height="640" style="display:block;margin:0%;">
-					            Your browser does not support the HTML5 canvas tag.
-			            </canvas>
-                        <br />
+            </div>
+			<div class="col-sm-6" style="margin: 0%;">
+                <center>
+                    <br />
+			        <canvas id="game" width="640" height="640" style="display:block;margin:0%;">
+					        Your browser does not support the HTML5 canvas tag.
+			        </canvas>
+                    <br />
                     
-			            <textarea id="chat" class="form-control" style="max-height:15%; max-width: 640px; height: 200px;" readonly></textarea> <br />
-				        <input id="message" class=form-control type="text" style="width:640px;" placeholder="Chat Message" />
-			        </center>
-                </div>
-                <div class="col-md-3" style="padding: 10px; border-radius: 3px 4px; background-color: #133a26">
-                    <div style="background-color: #014421; border-radius: 3px 4px; color: white; padding: 10px; height: 100%; text-align: right;">
-                        <center><h3>Dev Tools</h3></center>
-                        <h4>Draw Polygons: <input id="DrawPoly" type="checkbox" /></h4>
-
-                    </div>
+			        <textarea id="chat" class="form-control" style="max-height:15%; max-width: 640px; height: 200px; width: 640px;" readonly></textarea> <br />
+				    <input id="message" class=form-control type="text" style="width:640px;" placeholder="Chat Message" />
+                </center>
+            </div>
+            <div class="col-md-3" style="padding: 10px; border-radius: 3px 4px; background-color: #133a26; height: 97.6%;">
+                <div style="background-color: #014421; border-radius: 3px 4px; color: white; padding: 10px; height: 100%; text-align: right;">
+                    <center><h3>Dev Tools</h3></center>
+                    <h4>Draw Polygons: <input id="DrawPoly" type="checkbox" /></h4>
                 </div>
             </div>
 		</div>
