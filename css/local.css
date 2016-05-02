@@ -44,5 +44,5 @@ body #site_content {
 }
 body {
     background-color: #266A2E;
-
+    min-height: 100%;
 }
