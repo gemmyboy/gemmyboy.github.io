@@ -1,0 +1,123 @@
+﻿<html>
+    <!-- NOTE: Dev About -->
+	<header>
+        <title>Home</title>
+        <link href="../css/local.css" rel="stylesheet" />
+        <!-- JQuery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        <!-- Bootstrap things -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+	</header>
+	<body class="container-fluid" style="padding: 0px;">
+        <div id="site_header" class="row">
+            <div class="col-sm-1" style="padding-top: 5px; padding-left: 5px; text-align: left;">
+                <span class="fa-stack" style="font-size: 60%;">
+                    <a href="index.html" style="color: white;">
+                        <i class="fa fa-square fa-stack-2x"></i>
+                        <strong class="fa fa-code fa-stack-1x animate_color"></strong>
+                    </a>
+                </span>
+            </div>
+            <div class="col-sm-1" style="padding-top: 5px; padding-left: 5px; text-align: left;">
+                <a href="about.html" style="color: white;">
+                    <span class="fa-stack" style="font-size: 60%;">
+                        <i class="fa fa-square fa-stack-2x"></i>
+                        <strong class="fa fa-user fa-stack-1x animate_color"></strong>
+                    </span>
+                </a>
+            </div>
+        </div>
+        <div id="site_content" class="row" style="padding: 4%; margin: 0px; background-color: #266A2E;">
+            <div class="row">
+                <div class="col-md-12" style="padding: 20px; background-color: #ddd; border-radius: 3px 4px;">
+                    <div class="col-md-4"><img src="../graphics/aboutme.jpg" style="width: 80%;" /></div>
+                    <div class="col-md-8" style="text-align: center;">
+                        <h1><b>Marcus N Shannon</b></h1>
+                        <h3><b>Software Developer</b></h3>
+                        <p style="text-align: left;">
+                            <b>Education-Skills:</b><br />
+                            University of Louisiana at Lafayette - Bachelors Degree in Computer Science <br /><br />
+
+                            Languages - (Backend): C#, C++, C, Java, Go, Python, Scheme, SQL <br />
+                            Languages - (Frontend): HTML(5), CSS, JS <br />
+                            Frameworks - Bootstrap, JQuery, AJAX, MVC, SimpleData, SqlMetal, Google Maps API <br />
+                            Experience - Visual Studios, NotePad++, GEdit,  Sql Server Management Studios (SSMS), VMWare, Github, SVN (Tortoise)                        
+                        </p>
+                    
+                        <h3><b>Professional Work Experience</b></h3>
+                        <ul style="text-align: left;">
+                            <li>Informatics Research Institute - <a href="http://nimsat.org">NIMSAT</a></li>
+                            <ul>
+                                <li>Louisiana Business Emergency Operations Center <a href="http://labeoc.org">LA BEOC</a></li>
+                                <ul>
+                                    <li>
+                                        Learned front-end development languages: Html, CSS, & JS with a multitude of frameworks while working on this project.
+                                        This project was built using Microsoft Webforms and was originally proposed back in 2010.  Here I fixed an extremely buggy
+                                        ticketing system while also enforcing QA tests to ensure the quality of the website.  Database maintanance was another
+                                        essential task I performed, this included pulling statistics of active users and other useful information to determine
+                                        the viability of the site.  
+                                    </li>
+                                </ul>
+                                <li>Virtual Business Emergency Operations Center - <a href="http://vbeoc.org">VBEOC</a></li>
+                                <ul>
+                                    <li>
+                                        Our national platform that is currently in development: utilizes all the latest web-development technologies such as AJAX, Bootstrap,
+                                        MVC, and hooks for creating a data api using JSON.  Here, I created an extremely responsive resource request management system
+                                        while also building out the data-api.
+                                    </li>
+                                </ul>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-12" style="padding: 20px; background-color: #ddd; border-radius: 3px 4px;">
+                    <h3><b>Things I've Created</b></h3>
+                    <ul style="text-align: left;">
+                        <li>Spider - Webcrawler</li>
+                        <ul>
+                            <li>
+                                    A web crawler which can recursively scan entire sites, download, parse urls, and search websites given a query.
+                            </li>
+                            <li>Language: Go</li>
+                        </ul>
+                        <li>Neural Network API</li>
+                        <ul>
+                            <li>
+                                Implement a generic neural network api which can be easily leveraged to any given topology. Currently, the api
+                                uses Back-Propagation for training purposes. However, I also plan to implement the Genetic Algorithm to allow
+                                for maximum flexibility when utilizing the API.
+
+                            </li>
+                            <li>
+                                Language: Go
+                            </li>
+                        </ul>
+                        <li>Synchronous Server</li>
+                        <ul>
+                            <li>
+                                While investigating into software architectures dealing in networking, I stumbled across a problem which I've come across commonly
+                                in large, complex systems.  The problem was: "How do you streamline a network connection that may need to communicate with 100's of backend systems?"
+                                The overhead would be extensive if a single computer had to make over 100 connections, not mention the headache it would give the developers working
+                                on such an application. <br />
+                                Synchronous Server(SS) is a generic application created to solve this problem.  The architecture uses this idea of group subscriptions in which:
+                                once a client connects to the SS.  That connection may subscribe to a whole slew of groups, where each group is talking to 1 or more backend servers 
+                                or even other clients themselves.  Minimizing the overhead by funneling all data over single connection does create a single point of failure however
+                                it eleminates a lot of other overhead on both the client and server sides of an internet connection.
+                            </li>
+                            <li>
+                                Language: Go
+                            </li>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="site_footer">
+        </div>
+	</body>
+</html>
