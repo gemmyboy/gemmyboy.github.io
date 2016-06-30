@@ -32,12 +32,22 @@
 
 body #site_header {
     width: 100%;
-    background-color: #014421;
     color: white;
     font-size: 75px;
     margin: 0px;
+    position: fixed;
+    z-index: 2;
 }
+
+body #site_header.phase_bg {
+    box-shadow: 0 8px 6px -2px #111;
+    background-color: #014421;
+}
+
 
 body #site_content {
     width: 100%;
+    padding: 4%;
+    padding-top: 10%;
+    position:relative;
 }

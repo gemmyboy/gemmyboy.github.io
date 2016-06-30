@@ -11,7 +11,7 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 	</header>
 	<body class="container-fluid" style="padding: 0px; background-color: #266A2E;">
-        <div id="site_header" class="row">
+        <div id="site_header" class="row phase_bg">
             <div class="col-sm-1" style="padding-top: 5px; padding-left: 5px; padding-right: 0px; text-align: left;">
                 <span class="fa-stack" style="font-size: 60%;">
                     <a href="../index.html" style="color: white;">
@@ -30,7 +30,7 @@
             </div>
 			<div class="col-sm-10"></div>
         </div>
-        <div id="site_content" class="row" style="padding: 4%; margin: 0px;">
+        <div id="site_content" class="row">
             <div class="row">
                 <div class="col-md-12" style="padding: 20px; background-color: #ddd; border-radius: 3px 4px;">
                     <div class="col-md-4"><img src="../graphics/aboutme.jpg" style="width: 70%;" /></div>
@@ -44,7 +44,9 @@
                             Languages - (Backend): C#, C++, C, Java, Go, Python, Scheme, SQL, Assembly <br />
                             Languages - (Frontend): HTML(5), CSS, JS <br />
                             Frameworks - Bootstrap, JQuery, AJAX, MVC(4), SimpleData, SqlMetal, Google Maps API <br />
-                            Experience - Visual Studios, NotePad++, GEdit,  Sql Server Management Studios (SSMS), VMWare, Github, SVN (Tortoise)                        
+                            Experience - Visual Studios, NotePad++, GEdit,  Sql Server Management Studios (SSMS), VMWare, Github, SVN (Tortoise),
+                            Android Studio, Netbeans, Eclipse, Photoshop, Unity, Blender, liteide(GoLang), Microsoft (Word, Excel, & Powerpoint),
+                            
                         </p>
                     
                         <h3><b>Professional Work Experience</b></h3>
@@ -127,5 +129,17 @@
         </div>
         <div id="site_footer">
         </div>
+
+        <script>
+            $(document).scroll(function () {
+                if ($(window).scrollTop() > 100) {
+                    $("#site_header").removeClass("phase_bg");
+                    $("#site_header").css("opacity", 0.5);
+                } else {
+                    $("#site_header").addClass("phase_bg");
+                    $("#site_header").css("opacity", 1.0);
+                }
+            });
+        </script>
 	</body>
 </html>
