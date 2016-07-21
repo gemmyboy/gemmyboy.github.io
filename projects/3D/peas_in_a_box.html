@@ -3,84 +3,48 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta charset="utf-8" />
-        <title>Peas In a Box</title>
+        <title>Gem Test</title>
 
         <!-- Import gem and all it's dependencies -->
-        <script src="js/three.min.js"></script>
-        <script src="js/OrbitControls.js"></script>
-        <script src="js/oimo.min.js"></script>
-        <script src="js/v3d.js"></script>
-        <script src="js/gem.js"></script>
+        <script src="three.min.js"></script>
+        <script src="OrbitControls.js"></script>
+        <script src="oimo.min.js"></script>
+        <script src="v3d.js"></script>
+        <script src="gem.js"></script>
     </head>
     <body style="margin: 0px">
         <div id="container"></div>
-
         <script>
-            gem.Create();
+            gem.Create_World()
             gem.Light();
 
-            var sph_body = gem.Generate_Simple_Entity_Oimo_Opts();
-            sph_body.CanMove(true);
-            sph_body.SetType(sph_body.type.sphere);
-            sph_body.SetPosition([0, 200, 0]);
-            sph_body.SetSize([5, 5, 5]);
+            gem.Create_Static_Box('base_box', [0, -20, 0], [100, 10, 100]);
+            gem.Create_Static_Box('wall1', [-50, 0, 0], [10, 50, 100]);
+            gem.Create_Static_Box('wall2', [50, 0, 0], [10, 50, 100]);
+            gem.Create_Static_Box('wall3', [0, 0, -55], [10, 50, 110], [0, 90, 0]);
+            gem.Create_Static_Box('wall4', [0, 0, 55], [10, 50, 110], [0, 90, 0]);
 
-            var box_body = gem.Generate_Simple_Entity_Oimo_Opts();
-            box_body.SetSize([100, 10, 100]);
-            box_body.SetPosition([0, -20, 0]);
-
-            //Each Base shape type has an Optimal Geometry size to match OIMO Collision ; OIMO is weird
-            var box_mesh = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(new THREE.BoxGeometry(1, 1, 1)), new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 }));
-            var box_mesh1 = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(new THREE.BoxGeometry(1, 1, 1)), new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 }));
-            var box_mesh2 = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(new THREE.BoxGeometry(1, 1, 1)), new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 }));
-            var box_mesh3 = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(new THREE.BoxGeometry(1, 1, 1)), new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 }));
-            var box_mesh4 = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(new THREE.BoxGeometry(1, 1, 1)), new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 }));
-            
-
-            gem.Add_Simple_Entity('derp', box_body.GetOpts(), box_mesh, undefined);
-
-
-            box_body.SetPosition([-50, 0, 0]);
-            box_body.SetSize([10, 50, 100]);
-            gem.Add_Simple_Entity('bb1', box_body.GetOpts(), box_mesh1, undefined);
-            box_body.SetPosition([50, 0, 0]);
-            box_body.SetSize([10, 50, 100]);
-            gem.Add_Simple_Entity('bb2', box_body.GetOpts(), box_mesh2, undefined)
-            box_body.SetPosition([0, 0, 55]);
-            box_body.SetSize([10, 50, 110]);
-            box_body.SetRotation([0, 90, 0]);
-            gem.Add_Simple_Entity('bb3', box_body.GetOpts(), box_mesh3, undefined)
-            box_body.SetPosition([0, 0, -55]);
-            box_body.SetSize([10, 50, 110]);
-            box_body.SetRotation([0, 90, 0]);
-            gem.Add_Simple_Entity('bb4', box_body.GetOpts(), box_mesh4, undefined)
 
             var max = 1000;
             var cur = 0;
 
             //GameLoop Logic
             gem.GameLoop = function () {
-
                 if (cur < max) {
-                    var sph_mesh = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(new THREE.SphereGeometry(1, 32, 32)), new THREE.MeshPhongMaterial({ color: 0x3f6b3b }));
-
                     var x = rand(-20, 20);
                     var y = rand(100, 200);
                     var z = rand(-20, 20);
 
-                    sph_body.SetPosition([x, y, z]);
-                    gem.Add_Simple_Entity(String(cur), sph_body.GetOpts(), sph_mesh, undefined);
+                    var sph_update = function (me) {
+                        if (me.body.body.position.y < -5) {
+                            gem.Remove_Entity(me.id);
+                        }
+                    };
+                    gem.Create_Dynamic_Sphere(String(cur), [x, y, z], [5, 5, 5], undefined, undefined, undefined, sph_update);
                     cur++;
-                }
 
-                entity_count = gem.entity_keys.length;
-                while (entity_count--) {
-                    if (gem.entities[gem.entity_keys[entity_count]] == undefined) continue;
-                    if (gem.entities[gem.entity_keys[entity_count]].body.body.position.y < -5) {
-                        gem.Remove_Entity(gem.entity_keys[entity_count]);
-                    }//End if
-                }//End while
-            };
+                }//End if
+            };//End GameLoops
 
             gem.Start();
 
@@ -93,6 +57,9 @@
                 else r = min + Math.random() * max;
                 return r.toFixed(n) * 1;
             }
+
+
+
         </script>
     </body>
 </html>
