@@ -18,15 +18,58 @@
             gem.Create_World();
             gem.Light();
 
+            var wall_mat = new THREE.MeshPhongMaterial({ color: 0x654321, reflectivity: 10, specular: 0x111111});
 
             //Build out the Terrain.
+            gem.Create_Static_Box('floor', [0, -20, 0], [200, 10, 200], undefined, new THREE.MeshPhongMaterial({color: 0x006400, emissive: 0x006400}));
+            gem.Create_Static_Box('wall1', [102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
+            gem.Create_Static_Box('wall2', [-102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
+            gem.Create_Static_Box('wall3', [0, 15, 102.5], [5, 80, 210], [0, 90, 0], wall_mat);
+            gem.Create_Static_Box('wall4', [0, 15, -102.5], [5, 80, 210], [0, 90, 0], wall_mat);
 
 
 
 
 
 
-            
+
+
+
+
+
+
+
+            gem.Start();
+
+
+
+            //----------------------------------------
+
+            //Randomly Create Sphere's and drop them into the scene
+            var cur = 0;
+            var Food = function () {
+                var x = rand(-20, 20);
+                var y = rand(100, 200);
+                var z = rand(-20, 20);
+
+                var sph_update = function (me) {
+                    if (me.body.body.position.y < -5) {
+                        gem.Remove_Entity(me.id);
+                    }
+                };
+                gem.Create_Dynamic_Sphere(String(cur), [x, y, z], [5, 5, 5], undefined, undefined, undefined, sph_update);
+                cur++;
+            };//End Food()
+
+            //----------------------
+            /* random number */
+            function rand(min, max, n) {
+                var r, n = n || 0;
+                if (min < 0) r = min + Math.random() * (Math.abs(min) + max);
+                else r = min + Math.random() * max;
+                return r.toFixed(n) * 1;
+            }//End rand()
+
         </script>
     </body>
 </html>
