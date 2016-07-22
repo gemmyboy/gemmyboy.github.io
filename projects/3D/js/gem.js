@@ -32,6 +32,7 @@ var gem = {
         //  v3d.js is really just used to simplify the usage of Three.js
         //  Anything pertaining to the Mesh & Material goes here.
         this.world.v3d = new V3D.View();
+        this.world.v3d.renderer.shadowMap.enabled = true;
 
         //All entities in the world go here.
         //  This ranges from terrain, player, item, plant, anything.....
@@ -46,7 +47,6 @@ var gem = {
         this.entity_keys = [];
 
         //Internal Action Queue to run after Update is processed for gameloop
-        //
         this.internal_action_queue = [];
     },//End Create()
 
@@ -143,6 +143,8 @@ var gem = {
                     this.state.update = false;
                 }
             },
+            Set_Material: function (mat) { this.mesh.material = mat;},
+            Get_Material: function () { return this.mesh.material; },
             Get_Position: function () { return this.body.getPosition(); },
             Get_Quaternion: function () { return this.body.Get_Quaternion(); },
             Get_Euler: function () { return this.body.getEuler(); }
@@ -155,6 +157,9 @@ var gem = {
         entity.mesh.scale.set(size[0], size[1], size[2]);
         entity.mesh.position.set(pos[0], pos[1], pos[2]);
         entity.mesh.rotation.set(rot[0] * V3D.ToRad, rot[1] * V3D.ToRad, rot[2] * V3D.ToRad);
+
+        entity.mesh.castShadow = true;
+        entity.mesh.receiveShadow = true;
 
         if (entity.body.body == undefined) { alert(entity.id + ": body is undefined"); return; }
 
@@ -312,7 +317,7 @@ var gem = {
         //Pretty Obvious
         if (shape_type == 'box') {
             core_shape.body.SetType(core_shape.body.type.box);
-            var mat = opt_material || new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 });
+            var mat = opt_material || new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50});
             var core_shape_geo = new THREE.BufferGeometry().fromGeometry(new THREE.BoxGeometry(1, 1, 1));
             core_shape.mesh = new THREE.Mesh(core_shape_geo, mat);
         } else if (shape_type == 'sphere') {
@@ -324,6 +329,11 @@ var gem = {
             core_shape.body.SetType(core_shape.body.type.cylinder);
             var mat = opt_material || new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 });
             var core_shape_geo = new THREE.BufferGeometry().fromGeometry(new THREE.CylinderGeometry(0.5, 0.5, 1, 12, 1));
+            core_shape.mesh = new THREE.Mesh(core_shape_geo, mat);
+        } else if (shape_type == 'plane') {
+            var mat = opt_material || new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 });
+            var core_shape_geo = new THREE.PlaneBufferGeometry(1, 1);
+            core_shape_geo.applyMatrix(new THREE.Matrix4().makeRotationX(-90 * V3D.ToRad))
             core_shape.mesh = new THREE.Mesh(core_shape_geo, mat);
         }
 
@@ -377,7 +387,23 @@ var gem = {
         cyl.body.CanMove(true);
 
         gem.Add_Simple_Entity(cyl.id, cyl.body.GetOpts(), cyl.mesh, opt_update_func);
-    }//End Create_Dynamic_Cylinder()
+    },//End Create_Dynamic_Cylinder()
+
+    //Creates a static plane - all parameters are optional
+    Create_Static_Plane: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
+        var pla = gem.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'plane');
+        pla.body.CanMove(false);
+
+        gem.Add_Simple_Entity(pla.id, pla.body.GetOpts(), pla.mesh, opt_update_func);
+    },//End Create_Static_Plane()
+
+    //Creates a dynamic plane - all parameters are optional
+    Create_Dynamic_Plane: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
+        var pla = gem.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'plane');
+        pla.body.CanMove(false);
+
+        gem.Add_Simple_Entity(pla.id, pla.body.GetOpts(), pla.mesh, opt_update_func);
+    },//End Create_Dynamic_Plane()
 }//End GameEngine.prototype
 
 

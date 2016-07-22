@@ -18,18 +18,68 @@
             gem.Create_World();
             gem.Light();
 
-            var wall_mat = new THREE.MeshPhongMaterial({ color: 0x654321, reflectivity: 10, specular: 0x111111});
+            var loader = new THREE.TextureLoader();
+            loader.crossOrigin = '';
+
+            var opts = function (event) {
+                event.wrapS = THREE.RepeatWrapping;
+                event.wrapT = THREE.RepeatWrapping;
+                event.repeat.set(12, 12);
+                event.anisotropy = 4;
+                event.format = THREE.RGBFormat;
+                event.needsUpdate = true;
+
+                return event;
+            };
+
+            var normal = opts(loader.load("assets/seamless-moss-2_NORMAL.png"));
+            var specular = loader.load("assets/seamless-moss-2_SPECULAR.png");
+            var displacement = loader.load("assets/seamless-moss-2_DISPLACEMENT.png");
+            var diffuse = opts(loader.load("assets/seamless-moss-2.jpg"));
+
+            var shader = THREE.ShaderLib.normal;
+
+            var uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+            
+            uniforms.enableDisplacement = true;
+            uniforms.enableDiffuse = true;
+            uniforms.tDisplacement = displacement;
+            uniforms.tDiffuse = diffuse;
+            uniforms.uDisplacementScale = 50;
+
+            var floor_mat = new THREE.ShaderMaterial({
+                fragmentShader: shader.fragmentShader,
+                vertexShader: shader.vertexShader,
+                uniforms: uniforms
+                //reflectivity: 10,
+                //shininess: 35,
+                //color: 0x002800,
+                //map: opts(loader.load("assets/seamless-moss-2.jpg")),
+                //specularMap: specular,
+                //normalMap: normal,
+                //normalScale: new THREE.Vector2(1.0, 1.0),
+                //bumpMap: loader.load("assets/seamless-moss-2_BUMP.png", text_opts),
+                //bumpScale: 0.99
+                //displacementMap: displacement,
+                //displacementScale: 2,
+                //displacementBias: 2
+            });
+
+            //var wall_mat = new THREE.MeshPhongMaterial({
+            //    reflectivity: 10,
+            //    shininess: 100,
+            //    //map: loader.load("assets/seamless-moss-2.jpg", text),
+            //    //specularMap: loader.load("assets/seamless-moss-2_SPECULAR.png", text_opts),
+            //    //normalMap: loader.load("assets/seamless-moss-2_NORMAL.png", text_opts),
+            //    //normalScale: new THREE.Vector2(0.8, 0.8)
+            //});
 
             //Build out the Terrain.
-            gem.Create_Static_Box('floor', [0, -20, 0], [200, 10, 200], undefined, new THREE.MeshPhongMaterial({color: 0x006400, emissive: 0x006400}));
-            gem.Create_Static_Box('wall1', [102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
-            gem.Create_Static_Box('wall2', [-102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
-            gem.Create_Static_Box('wall3', [0, 15, 102.5], [5, 80, 210], [0, 90, 0], wall_mat);
-            gem.Create_Static_Box('wall4', [0, 15, -102.5], [5, 80, 210], [0, 90, 0], wall_mat);
-
-
-
-
+            gem.Create_Static_Sphere('floor', [0, 0, 0], [25, 25, 25], undefined, floor_mat);
+            //gem.Create_Static_Box('wall1', [102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
+            //gem.Create_Static_Box('wall2', [-102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
+            //gem.Create_Static_Box('wall3', [0, 15, 102.5], [5, 80, 210], [0, 90, 0], wall_mat);
+            //gem.Create_Static_Box('wall4', [0, 15, -102.5], [5, 80, 210], [0, 90, 0], wall_mat);
 
 
 
