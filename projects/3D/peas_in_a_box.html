@@ -15,14 +15,14 @@
     <body style="margin: 0px">
         <div id="container"></div>
         <script>
-            gem.Create_World()
-            gem.Default_Light();
+            gem.Create_World();
+            gem.Shapes.Default_Light();
 
-            gem.Create_Static_Box('base_box', [0, -20, 0], [100, 10, 100]);
-            gem.Create_Static_Box('wall1', [-50, 0, 0], [10, 50, 100]);
-            gem.Create_Static_Box('wall2', [50, 0, 0], [10, 50, 100]);
-            gem.Create_Static_Box('wall3', [0, 0, -55], [10, 50, 110], [0, 90, 0]);
-            gem.Create_Static_Box('wall4', [0, 0, 55], [10, 50, 110], [0, 90, 0]);
+            gem.Shapes.Create_Static_Box('base_box', [0, -20, 0], [100, 10, 100]);
+            gem.Shapes.Create_Static_Box('wall1', [-50, 0, 0], [10, 50, 100]);
+            gem.Shapes.Create_Static_Box('wall2', [50, 0, 0], [10, 50, 100]);
+            gem.Shapes.Create_Static_Box('wall3', [0, 0, -55], [10, 50, 110], [0, 90, 0]);
+            gem.Shapes.Create_Static_Box('wall4', [0, 0, 55], [10, 50, 110], [0, 90, 0]);
 
 
             var max = 1000;
@@ -40,7 +40,7 @@
                             gem.Remove_Entity(me.id);
                         }
                     };
-                    gem.Create_Dynamic_Sphere(String(cur), [x, y, z], [5, 5, 5], undefined, undefined, undefined, sph_update);
+                    gem.Shapes.Create_Dynamic_Sphere(String(cur), [x, y, z], [5, 5, 5], undefined, undefined, undefined, sph_update);
                     cur++;
 
                 }//End if
