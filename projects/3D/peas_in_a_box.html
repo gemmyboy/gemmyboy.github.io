@@ -9,14 +9,13 @@
         <script src="js/three.min.js"></script>
         <script src="js/OrbitControls.js"></script>
         <script src="js/oimo.min.js"></script>
-        <script src="js/v3d.js"></script>
         <script src="js/gem.js"></script>
     </head>
     <body style="margin: 0px">
         <div id="container"></div>
         <script>
             gem.Create_World();
-            gem.Shapes.Default_Light();
+            gem.Helper.Light();
 
             gem.Shapes.Create_Static_Box('base_box', [0, -20, 0], [100, 10, 100]);
             gem.Shapes.Create_Static_Box('wall1', [-50, 0, 0], [10, 50, 100]);

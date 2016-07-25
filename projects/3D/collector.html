@@ -9,14 +9,13 @@
         <script src="js/three.min.js"></script>
         <script src="js/OrbitControls.js"></script>
         <script src="js/oimo.min.js"></script>
-        <script src="js/v3d.js"></script>
         <script src="js/gem.js"></script>
     </head>
     <body style="margin: 0px">
         <div id="container"></div>
         <script>
             gem.Create_World();
-            gem.Shapes.Default_Light();
+            gem.Helper.Light();
 
             //Materials
             var floor_opts = gem.Materials.Generate_Material_Opts();

@@ -1,4 +1,5 @@
-﻿//Wrapper for OIMO && Three.js && v3d.js
+﻿//Wrapper for OIMO && Three.js
+//  plus some other advanced functionality
 
 //This is basically god.... a gemarian god. ;)
 var gem = {
@@ -7,7 +8,8 @@ var gem = {
     entities: {},
     entity_keys: [],
     internal_action_queue: [],
-    GameLoop: function() {},
+    GameLoop: function () { },      //User Sets this for Game Logic
+    Setup: undefined,          //User Sets this for World Setup
     Create_World: function () {
 
         //Varies Default settings that can be changed.
@@ -16,6 +18,8 @@ var gem = {
         this.settings.collision_algo = 2;                               // 1: BruteForceBroadPhase  2: (default)sweep and prune  3: dynamic bounding volume tree 
         this.settings.solver_iter = 8;                                  //Number of iterations for constraint solvers. 
         this.settings.calc_stats = false;                               //Should Oimo calc stats?
+        this.settings.w = window.innerWidth - 4;
+        this.settings.h = window.innerHeight - 4;
 
         //Oimo
         //  Anything pertaining to physics/collisions calc + Rigidbodies goes here.
@@ -28,11 +32,16 @@ var gem = {
         //isUpdating -: Optimization for Internal_Game_Loop
         this.world.state = {isRunning: false, isUpdating: false};
 
-        //Three.js & v3d.js
-        //  v3d.js is really just used to simplify the usage of Three.js
-        //  Anything pertaining to the Mesh & Material goes here.
-        this.world.v3d = new V3D.View();
-        this.world.v3d.renderer.shadowMap.enabled = true;
+        //Three.js
+        //  --Either the user sets up the world like they want or 
+        //      we go with the default one.
+        if (this.Setup == undefined){
+            this.Helper.Setup();
+            this.Helper.Light();
+            this.Helper.Camera();
+        }
+        else
+            this.Setup();
 
         //All entities in the world go here.
         //  This ranges from terrain, player, item, plant, anything.....
@@ -72,10 +81,8 @@ var gem = {
     //Internal Render call. Gem deals with all graphical render calls :D
     Internal_Render_Loop: function () {
         requestAnimationFrame(gem.Internal_Render_Loop);
-        if (!gem.world.state.isRunning) {
-            return;
-        }
-        gem.world.v3d.render();
+        if (!gem.world.state.isRunning) return;
+        gem.world.renderer.render(gem.world.scene, gem.world.camera);
     },//End Internal_Render_Loop()
 
     //Internal GameLoop
@@ -156,7 +163,7 @@ var gem = {
 
         entity.mesh.scale.set(size[0], size[1], size[2]);
         entity.mesh.position.set(pos[0], pos[1], pos[2]);
-        entity.mesh.rotation.set(rot[0] * V3D.ToRad, rot[1] * V3D.ToRad, rot[2] * V3D.ToRad);
+        entity.mesh.rotation.set(rot[0] * gem.Helper.ToRad, rot[1] * gem.Helper.ToRad, rot[2] * gem.Helper.ToRad);
 
         entity.mesh.castShadow = true;
         entity.mesh.receiveShadow = true;
@@ -164,7 +171,7 @@ var gem = {
         if (entity.body.body == undefined) { alert(entity.id + ": body is undefined"); return; }
 
         gem.entities[entity.id] = entity;         //Add entity to the list of world entities
-        gem.world.v3d.scene.add(entity.mesh);     //bypass v3d.add because mesh is custom made via user ; We don't want your shit meshes v3d.
+        gem.world.scene.add(entity.mesh);
         gem.entity_keys.push(entity.id);
     },//End Internal_Add()
 
@@ -236,10 +243,10 @@ var gem = {
         var entity = gem.entities[id];
         if (entity.state.entity_complex) {
             for (var bod in entity.body) { gem.world.oimo_world.removeRigidBody(bod); }
-            gem.world.v3d.scene.remove(entity.mesh);
+            gem.world.scene.remove(entity.mesh);
         } else {
             gem.world.oimo_world.removeRigidBody(entity.body);
-            gem.world.v3d.scene.remove(entity.mesh);
+            gem.world.scene.remove(entity.mesh);
         }
 
         delete gem.entities[id];
@@ -296,9 +303,6 @@ var gem = {
     //  geometries created.
     Shapes: {
 
-        //Creates a general Light
-        Default_Light: function () { gem.world.v3d.initLight(); },
-
         //Internal Shape creator... DON'T USE OUTSIDE GEM
         Internal_Create_Shape: function (id, pos_array, size_array, rot_array, opt_material, opt_body_opts, shape_type) {
             var core_shape = {};
@@ -333,7 +337,7 @@ var gem = {
             } else if (shape_type == 'plane') {
                 var mat = opt_material || new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 });
                 var core_shape_geo = new THREE.PlaneBufferGeometry(1, 1);
-                core_shape_geo.applyMatrix(new THREE.Matrix4().makeRotationX(-90 * V3D.ToRad))
+                core_shape_geo.applyMatrix(new THREE.Matrix4().makeRotationX(-90 * gem.Helper.ToRad))
                 core_shape.mesh = new THREE.Mesh(core_shape_geo, mat);
             }
 
@@ -480,5 +484,207 @@ var gem = {
             loader.crossOrigin = '';
             return loader.load(file_path_string);
         }//End Load_General
-    }//End Texture
+    },//End Texture
+
+    //Migrating a lot of v3D functionality to here.
+    //  V3D only really exists to give a user a lot of default functionality
+    //  so they don't have to keep re-creating the wheel.
+    Helper: {
+        //Conversion Constants
+        ToRad: Math.PI / 180,
+        ToDeg: 180 / Math.PI,
+
+        //Creates a general Light
+        Light: function () {
+            var hemiLight = new THREE.HemisphereLight(0xffffff, 0x303030, 0.3);
+            gem.world.scene.add(hemiLight);
+            var dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            dirLight.position.set(0.5, 1, 0.5).normalize();
+            gem.world.scene.add(dirLight);
+        },//End Light()
+
+        //Default Setup if the Setup func isn't specified
+        Setup: function () {
+            gem.world.clock = new THREE.Clock();
+
+            gem.world.scene = new THREE.Scene();
+
+            gem.world.renderer = new THREE.WebGLRenderer({ precision: "mediump", antialias: true });
+            gem.world.renderer.setSize(gem.settings.w, gem.settings.h);
+            gem.world.renderer.setClearColor(0x1d1f20);
+
+            //Default Background
+            var gradTexture = function (color) {
+                var c = document.createElement("canvas");
+                var ct = c.getContext("2d");
+                c.width = 16; c.height = 128;
+                var gradient = ct.createLinearGradient(0, 0, 0, 128);
+                var i = color[0].length;
+                while (i--) { gradient.addColorStop(color[0][i], color[1][i]); }
+                ct.fillStyle = gradient;
+                ct.fillRect(0, 0, 16, 128);
+                var tx = new THREE.Texture(c);
+                tx.needsUpdate = true;
+                return tx;
+            };
+
+            var buffgeoBack = new THREE.BufferGeometry();
+            buffgeoBack.fromGeometry(new THREE.IcosahedronGeometry(1000, 1));
+            var back = new THREE.Mesh(buffgeoBack, new THREE.MeshBasicMaterial({ map: gradTexture([[0.75, 0.6, 0.4, 0.25], ['#1B1D1E', '#3D4143', '#72797D', '#b0babf']]), side: THREE.BackSide, depthWrite: false, fog: false }));
+            back.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(15 * gem.Helper.ToRad));
+            gem.world.scene.add(back);
+            gem.world.renderer.autoClear = false;
+
+            gem.world.container = document.getElementById('container');
+            gem.world.container.appendChild(gem.world.renderer.domElement);
+        },//End Setup()
+
+        Camera: function () {
+            gem.world.camera = new THREE.PerspectiveCamera(60, gem.settings.w / gem.settings.h, 0.1, 2000);
+
+            gem.world.Navigation = function (root) {
+                this.parent = root;
+                this.camPos = { h: 90, v: 60, distance: 400, automove: false };
+                this.mouse = { x: 0, y: 0, ox: 0, oy: 0, h: 0, v: 0, mx: 0, my: 0, down: false, over: false, moving: true, button: 0 };
+                this.vsize = { w: this.parent.w, h: this.parent.h };
+                this.center = { x: 0, y: 0, z: 0 };
+                this.key = [0, 0, 0, 0, 0, 0, 0];
+                this.rayTest = null;
+
+                var _this = this;
+                // disable context menu
+                document.addEventListener("contextmenu", function (e) { e.preventDefault(); }, false);
+
+                this.parent.container.addEventListener('mousemove', function (e) { _this.onMouseMove(e) }, false);
+                this.parent.container.addEventListener('mousedown', function (e) { _this.onMouseDown(e) }, false);
+                this.parent.container.addEventListener('mouseout', function (e) { _this.onMouseUp(e) }, false);
+                this.parent.container.addEventListener('mouseup', function (e) { _this.onMouseUp(e) }, false);
+
+                if (typeof window.ontouchstart !== 'undefined') {
+                    this.parent.container.addEventListener('touchstart', function (e) { _this.onMouseDown(e) }, false);
+                    this.parent.container.addEventListener('touchend', function (e) { _this.onMouseUp(e) }, false);
+                    this.parent.container.addEventListener('touchmove', function (e) { _this.onMouseMove(e) }, false);
+                }
+
+                this.parent.container.addEventListener('mousewheel', function (e) { _this.onMouseWheel(e) }, false);
+                this.parent.container.addEventListener('DOMMouseScroll', function (e) { _this.onMouseWheel(e) }, false);
+                window.addEventListener('resize', function (e) { _this.onWindowResize(e) }, false);
+            }
+            gem.world.Navigation.prototype = {
+                constructor: gem.world.Navigation,
+                initCamera: function (h, v, d) {
+                    this.camPos.h = h || 90;
+                    this.camPos.v = v || 60;
+                    this.camPos.distance = d || 400;
+                    this.moveCamera();
+                },
+                moveCamera: function () {
+                    this.parent.camera.position.copy(this.Orbit(this.center, this.camPos.h, this.camPos.v, this.camPos.distance));
+                    this.parent.camera.lookAt(this.center);
+                },
+                Orbit: function (origine, h, v, distance) {
+                    origine = origine || new THREE.Vector3();
+                    var p = new THREE.Vector3();
+                    var phi = v * gem.Helper.ToRad;
+                    var theta = h * gem.Helper.ToRad;
+                    p.x = (distance * Math.sin(phi) * Math.cos(theta)) + origine.x;
+                    p.z = (distance * Math.sin(phi) * Math.sin(theta)) + origine.z;
+                    p.y = (distance * Math.cos(phi)) + origine.y;
+                    return p;
+                },
+                unwrapDegrees: function (r) {
+                    r = r % 360;
+                    if (r > 180) r -= 360;
+                    if (r < -180) r += 360;
+                    return r;
+                },
+                initEvents: function () {
+                    var _this = this;
+                    // disable context menu
+                    document.addEventListener("contextmenu", function (e) { e.preventDefault(); }, false);
+
+                    this.parent.container.addEventListener('mousemove', function (e) { _this.onMouseMove(e) }, false);
+                    this.parent.container.addEventListener('mousedown', function (e) { _this.onMouseDown(e) }, false);
+                    this.parent.container.addEventListener('mouseout', function (e) { _this.onMouseUp(e) }, false);
+                    this.parent.container.addEventListener('mouseup', function (e) { _this.onMouseUp(e) }, false);
+
+                    if (typeof window.ontouchstart !== 'undefined') {
+                        this.parent.container.addEventListener('touchstart', function (e) { _this.onMouseDown(e) }, false);
+                        this.parent.container.addEventListener('touchend', function (e) { _this.onMouseUp(e) }, false);
+                        this.parent.container.addEventListener('touchmove', function (e) { _this.onMouseMove(e) }, false);
+                    }
+
+                    this.parent.container.addEventListener('mousewheel', function (e) { _this.onMouseWheel(e) }, false);
+                    this.parent.container.addEventListener('DOMMouseScroll', function (e) { _this.onMouseWheel(e) }, false);
+                    window.addEventListener('resize', function (e) { _this.onWindowResize(e) }, false);
+                },
+                onMouseRay: function (x, y) {
+                    this.mouse.mx = (this.mouse.x / this.vsize.w) * 2 - 1;
+                    this.mouse.my = -(this.mouse.y / this.vsize.h) * 2 + 1;
+                    this.rayTest();
+                },
+                onMouseMove: function (e) {
+                    e.preventDefault();
+                    var px, py;
+                    if (e.touches) {
+                        this.mouse.x = e.clientX || e.touches[0].pageX;
+                        this.mouse.y = e.clientY || e.touches[0].pageY;
+                    } else {
+                        this.mouse.x = e.clientX;
+                        this.mouse.y = e.clientY;
+                    }
+                    if (this.rayTest !== null) this.onMouseRay();
+                    if (this.mouse.down) {
+                        document.body.style.cursor = 'move';
+                        this.camPos.h = ((this.mouse.x - this.mouse.ox) * 0.3) + this.mouse.h;
+                        this.camPos.v = (-(this.mouse.y - this.mouse.oy) * 0.3) + this.mouse.v;
+                        this.moveCamera();
+                    }
+                },
+                onMouseDown: function (e) {
+                    e.preventDefault();
+                    var px, py;
+                    if (e.touches) {
+                        px = e.clientX || e.touches[0].pageX;
+                        py = e.clientY || e.touches[0].pageY;
+                    } else {
+                        px = e.clientX;
+                        py = e.clientY;
+                        // 0: default  1: left  2: middle  3: right
+                        this.mouse.button = e.which;
+                    }
+                    this.mouse.ox = px;
+                    this.mouse.oy = py;
+                    this.mouse.h = this.camPos.h;
+                    this.mouse.v = this.camPos.v;
+                    this.mouse.down = true;
+                    if (this.rayTest !== null) this.onMouseRay(px, py);
+                },
+                onMouseUp: function (e) {
+                    this.mouse.down = false;
+                    document.body.style.cursor = 'auto';
+                },
+                onMouseWheel: function (e) {
+                    var delta = 0;
+                    if (e.wheelDeltaY) { delta = e.wheelDeltaY * 0.01; }
+                    else if (e.wheelDelta) { delta = e.wheelDelta * 0.05; }
+                    else if (e.detail) { delta = -e.detail * 1.0; }
+                    this.camPos.distance -= (delta * 10);
+                    this.moveCamera();
+                },
+                onWindowResize: function () {
+                    this.vsize.w = window.innerWidth - 4;
+                    this.vsize.h = window.innerHeight - 4;
+                    this.parent.camera.aspect = this.vsize.w / this.vsize.h;
+                    this.parent.camera.updateProjectionMatrix();
+                    this.parent.renderer.setSize(this.vsize.w, this.vsize.h);
+                }
+            }//End camera.Navigation
+
+            gem.world.nav = new gem.world.Navigation(gem.world);
+            gem.world.nav.initCamera();
+        }//End Camera()
+
+    }//End Helper
+
 }//End Gem
