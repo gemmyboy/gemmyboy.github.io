@@ -25,37 +25,41 @@
             var floor_mat = gem.Materials.Create_Phong_Material(floor_opts.GetOpts());
 
             var rope_opts = gem.Materials.Generate_Material_Opts();
-            rope_opts.Set_Color(0x123456);
-            //rope_opts.Set_Emissive_Color(0xdddddd);
-            rope_opts.Set_Wireframe(true);
-            var rope_mat = gem.Materials.Create_Phong_Material(rope_opts.GetOpts);
+            rope_opts.Set_Color(0x654321);
+            rope_opts.Set_Specular_Color(0xdddddd);
+            var rope_mat = gem.Materials.Create_Phong_Material(rope_opts.GetOpts());
+
+            var obs_opts = gem.Materials.Generate_Material_Opts();
+            obs_opts.Set_Color(0x002300);
+            var obs_mat = gem.Materials.Create_Phong_Material(obs_opts.GetOpts());
+
 
             //Create all shapes
             gem.Shapes.Create_Static_Plane('floor', [0, -10, 0], [4000, 0.1, 4000], undefined, floor_mat);
-            gem.Shapes.Create_Static_Box('obstacle', [0, 0, 0], [100, 150, 300], undefined, floor_mat);
-            gem.Shapes.Create_Static_Box('obstacle_1', [0, 85, 140], [100, 20, 20], undefined, floor_mat);
-            gem.Shapes.Create_Static_Box('obstacle_2', [0, 85, -140], [100, 20, 20], undefined, floor_mat);
+            gem.Shapes.Create_Static_Box('obstacle', [0, 0, 0], [100, 150, 300], undefined, obs_mat);
+            gem.Shapes.Create_Static_Box('obstacle_1', [0, 85, 140], [100, 20, 20], undefined, obs_mat);
+            gem.Shapes.Create_Static_Box('obstacle_2', [0, 85, -140], [100, 20, 20], undefined, obs_mat);
 
-            var max = 21;
+
+            gem.Shapes.Create_Static_Box('wall_1', [300, 180, 0], [20, 400, 200], undefined, obs_mat);
+            gem.Shapes.Create_Static_Box('wall_2', [-300, 180, 0], [20, 400, 200], undefined, obs_mat);
+
+            var max = 40;
             var start_x = -300;
             var n = 5;
-            var x = 30;
+            var x = 15;
 
-            var id_list = [];
             for (var i = 0; i < max; i++) {
                 gem.Shapes.Create_Dynamic_Cylinder('cyl_' + i, [start_x + (i * x), 200, 0], [n, x, n], [0, 0, 90], rope_mat);
-                id_list.push('cyl_' + i);
-
-                //Process Internal Admin work
-                while (gem.internal_action_queue.length > 0)
-                    (gem.internal_action_queue.pop()).func();
-
 
                 if (i != 0) {
-                    gem.world.oimo_world.add({ type: 'joint', body1: 'cyl_' + (i - 1), body2: 'cyl_' + i, pos1: [0, 16, 0], pos2: [0, -16, 0], min: 2, max: 20, collision: true, spring: [0.5, 0.2] });
+                    gem.Add_Simple_Joint('jointBall', 'cyl_' + (i - 1), 'cyl_' + i, [0, (x / 2) + 1, 0], [0, ((x / 2) + 1) * -1, 0]);
                     console.log("Attached: joint cyl_" + (i - 1) + " to cyl_" + i);
                 }//End if
             }//End for
+
+            //gem.Add_Simple_Joint('jointBall', 'wall_1', 'cyl_0', [-20, 150, 0], [0, ((x / 2) + 1) * -1, 0]);
+            gem.Add_Simple_Joint('jointBall', 'wall_2', 'cyl_' + (max - 1), [20, 150, 0], [0, ((x / 2) + 1), 0]);
 
             gem.Start();
         </script>

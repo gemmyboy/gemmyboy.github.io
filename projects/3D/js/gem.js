@@ -103,6 +103,7 @@ var gem = {
             }//End if
         }//End while
 
+        //Logic Dictated via the programmer
         gem.GameLoop();
 
         //Call the Update functions for every-single-entity
@@ -114,9 +115,9 @@ var gem = {
         }
         gem.world.state.isUpdating = false;
 
-        //Process Internal Admin work
-        while(gem.internal_action_queue.length > 0)
-            (gem.internal_action_queue.pop()).func();
+        //Process Internal Action work
+        while (gem.internal_action_queue.length > 0)
+            (gem.internal_action_queue.shift()).func();
     },//End Internal_Game_Loop()
 
 
@@ -187,6 +188,52 @@ var gem = {
     Add_Simple_Entity: function (id, oimo_opts, mesh, update_func) {
         gem.internal_action_queue.push({ func: gem.Internal_Simple_Add.bind(undefined, id, oimo_opts, mesh, update_func) });
     },//End Add_Simple_Entity()
+
+
+    //Internal Add Simple Joint
+    Internal_Add_Simple_Joint: function (type, entity_1_id, entity_2_id, array_pos_1, array_pos_2, opt_container) {
+        var en_1 = gem.entities[entity_1_id].body.body;
+        var en_2 = gem.entities[entity_2_id].body.body;
+        var pos_1 = array_pos_1 || [0, 0, 0];
+        var pos_2 = array_pos_2 || [0, 0, 0];
+        var t_type = type || 'joint';
+        var opts = opt_container || {};
+
+        //Map inputs
+        opts.type = t_type;
+        opts.body1 = en_1;
+        opts.body2= en_2;
+        opts.pos1 = pos_1;
+        opts.pos2 = pos_2;
+        opts.min = 2;
+        opts.max = 20;
+        opts.collision = true;
+
+        //Queue up the work order
+        gem.world.oimo_world.add(opts);
+    },//End Internal_Add_Simple_Joint()
+
+    //Takes 2 entities and joins them at the given local locations specified
+    //  Entities can be pulled from gem.entities[string_id]
+    //  array_pos_# is [x, y, z] local to the geometry
+    //  opts_container:
+    //      min, max - #    -   Joint distance from each other
+    //      spring - [#, #] -   How soft the joint is
+    //      motor - [#, #]  -   Something about a motor - line 12399 in oimo.js
+    //      limit - [#, #]  -   Rotational limit
+    //
+    //  type options:
+    //      'joint' 
+    //      'jointDistance'     - uses opts: min, max, spring, motor
+    //      'jointBall'
+    //      'jointHinge'        - uses opts: min, max, spring, motor
+    //      'jointPrisme'       - uses opts: min, max
+    //      'jointSlide'        - uses opts: min, max
+    //      'jointWheel'        - uses opts: min, max, spring, motor, limit
+    Add_Simple_Joint: function (type, entity_1_id, entity_2_id, array_pos_1, array_pos_2, opt_container) {
+        gem.internal_action_queue.push({ func: gem.Internal_Add_Simple_Joint.bind(undefined, type, entity_1_id, entity_2_id, array_pos_1, array_pos_2, opt_container) });
+    },//End Add_Simple_Joint()
+
 
     //Creates and Adds a Complex Entity to the world.
     //  A complex entity has multiple Rigidbodies.
@@ -442,14 +489,15 @@ var gem = {
                 Set_Blending: function (three_blend_const) { this.opts.blending = three_blend_const || THREE.NormalBlending; },
                 Set_Visible: function (bool) { this.opts.visible = bool || true; },
                 Set_Update: function (bool) { this.opts.needsUpdate = bool || false; },
-                Set_Diffuse_Texture: function (texture) { this.opts.map = texture || undefined; },
+                Set_Diffuse_Texture: function (texture) { this.opts.map = texture || null; },
                 Set_Normal_Texture: function (texture, three_vector2_normal_scale) { this.opts.normalMap = texture || undefined; this.opts.normalScale = normal_scale_opt || THREE.Vector2(1.0, 1.0); },
-                Set_Specular_Texture: function (texture) { this.opts.specularMap = texture || undefined; },
-                Set_Emissive_Texture: function (texture) { this.opts.emissiveMap = texture || undefined; },
-                Set_Alpha_Texture: function (texture) { this.opts.alphaMap = texture || undefined; },
+                Set_Specular_Texture: function (texture) { this.opts.specularMap = texture || null; },
+                Set_Emissive_Texture: function (texture) { this.opts.emissiveMap = texture || null; },
+                Set_Alpha_Texture: function (texture) { this.opts.alphaMap = texture || null; },
                 Set_Shininess: function (int) { this.opts.shininess = int || 30; },
                 Set_Color: function (hex_color) { this.opts.color = hex_color || 0xdddddd; },
                 Set_Emissive_Color: function (hex_color) { this.opts.emissive = hex_color || 0x000000 },
+                Set_Emissive_Intensity: function (float) { this.opts.emissiveIntensity = float || 0.5 },
                 Set_Reflectivity: function (int) { this.opts.reflectivity = int || 1; },
                 Set_Specular_Color: function (hex_color) { this.opts.specular = hex_color || 0x111111; },
                 Set_Fog: function (bool) { this.opts.fog = bool || true; },
