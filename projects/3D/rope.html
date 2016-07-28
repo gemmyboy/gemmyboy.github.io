@@ -48,18 +48,16 @@
             var start_x = -300;
             var n = 5;
             var x = 15;
+            var y = (x / 2);
 
             for (var i = 0; i < max; i++) {
                 gem.Shapes.Create_Dynamic_Cylinder('cyl_' + i, [start_x + (i * x), 200, 0], [n, x, n], [0, 0, 90], rope_mat);
 
-                if (i != 0) {
-                    gem.Add_Simple_Joint('jointBall', 'cyl_' + (i - 1), 'cyl_' + i, [0, (x / 2) + 1, 0], [0, ((x / 2) + 1) * -1, 0]);
-                    console.log("Attached: joint cyl_" + (i - 1) + " to cyl_" + i);
-                }//End if
+                if (i != 0) gem.Add_Simple_Joint('jointBall', 'cyl_' + (i - 1), 'cyl_' + i, [0, y, 0], [0, y * -1, 0]);
             }//End for
 
-            //gem.Add_Simple_Joint('jointBall', 'wall_1', 'cyl_0', [-20, 150, 0], [0, ((x / 2) + 1) * -1, 0]);
-            gem.Add_Simple_Joint('jointBall', 'wall_2', 'cyl_' + (max - 1), [20, 150, 0], [0, ((x / 2) + 1), 0]);
+            gem.Add_Simple_Joint('jointBall', 'wall_1', 'cyl_0', [-10, 150, 0], [0, ((x / 2) + 1) * -1, 0]);
+            gem.Add_Simple_Joint('jointBall', 'wall_2', 'cyl_' + (max - 1), [10, 150, 0], [0, y, 0]);
 
             gem.Start();
         </script>
