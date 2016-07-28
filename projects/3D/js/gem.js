@@ -35,6 +35,7 @@ var gem = {
         //Three.js
         //  --Either the user sets up the world like they want or 
         //      we go with the default one.
+        //      We do this for the newer users.
         if (this.Setup == undefined){
             this.Helper.Setup();
             this.Helper.Light();
@@ -121,6 +122,7 @@ var gem = {
 
     //Finishes the insertion into the World - DO NOT USE OUTSIDE GEM
     Internal_Simple_Add: function (id, oimo_opts, mesh, update_func) {
+        oimo_opts.name = id;
         var entity = {
             id: id,
             body: new OIMO.Body(oimo_opts),         //Inserts Rigidbody
@@ -332,11 +334,11 @@ var gem = {
             } else if (shape_type == 'cylinder') {
                 core_shape.body.SetType(core_shape.body.type.cylinder);
                 var mat = opt_material || new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 });
-                var core_shape_geo = new THREE.BufferGeometry().fromGeometry(new THREE.CylinderGeometry(0.5, 0.5, 1, 12, 1));
+                var core_shape_geo = new THREE.BufferGeometry().fromGeometry(new THREE.CylinderGeometry(1, 1, 1, 12, 1));
                 core_shape.mesh = new THREE.Mesh(core_shape_geo, mat);
             } else if (shape_type == 'plane') {
                 var mat = opt_material || new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 50 });
-                var core_shape_geo = new THREE.PlaneBufferGeometry(1, 1);
+                var core_shape_geo = new THREE.PlaneBufferGeometry(1.0, 1.0);
                 core_shape_geo.applyMatrix(new THREE.Matrix4().makeRotationX(-90 * gem.Helper.ToRad))
                 core_shape.mesh = new THREE.Mesh(core_shape_geo, mat);
             }
@@ -447,9 +449,11 @@ var gem = {
                 Set_Alpha_Texture: function (texture) { this.opts.alphaMap = texture || undefined; },
                 Set_Shininess: function (int) { this.opts.shininess = int || 30; },
                 Set_Color: function (hex_color) { this.opts.color = hex_color || 0xdddddd; },
+                Set_Emissive_Color: function (hex_color) { this.opts.emissive = hex_color || 0x000000 },
                 Set_Reflectivity: function (int) { this.opts.reflectivity = int || 1; },
                 Set_Specular_Color: function (hex_color) { this.opts.specular = hex_color || 0x111111; },
                 Set_Fog: function (bool) { this.opts.fog = bool || true; },
+                Set_Wireframe: function (bool) {this.opts.wireframe = bool || true; },
                 GetOpts: function () { return this.opts; }
             };
             return mat_opts;
@@ -466,8 +470,8 @@ var gem = {
     //Used just to load in textures which we'll then throw into the materials
     Texture: {
         Load_Tiled_Texture: function (file_path_string, repeat_u, repeat_v) {
-            var u = repeat_u || 12;
-            var v = repeat_v || 12;
+            var u = repeat_u || 6;
+            var v = repeat_v || 6;
 
             var loader = new THREE.TextureLoader();
             loader.crossOrigin = '';

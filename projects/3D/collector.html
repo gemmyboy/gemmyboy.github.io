@@ -8,14 +8,13 @@
         <!-- Import gem and all it's dependencies -->
         <script src="js/three.min.js"></script>
         <script src="js/OrbitControls.js"></script>
-        <script src="js/oimo.min.js"></script>
+        <script src="js/oimo.js"></script>
         <script src="js/gem.js"></script>
     </head>
     <body style="margin: 0px">
         <div id="container"></div>
         <script>
             gem.Create_World();
-            gem.Helper.Light();
 
             //Materials
             var floor_opts = gem.Materials.Generate_Material_Opts();
@@ -32,56 +31,33 @@
             wall_opts.Set_Color(0x654321);
             var wall_mat = gem.Materials.Create_Phong_Material(wall_opts.GetOpts("assets/odd-normal.png"));
 
-            //var pea_opts = gem.Materials.Generate_Material_Opts();
-            //pea_opts.Set_Color(0x002800);
-            //pea_opts.Set_Shininess(100);
-            //pea_opts.Set_Normal_Texture(gem.Texture.Load_Tiled_Texture("assets/pea-normal.png"));
+
+
+            //Build out the Terrain with boxes
+            //gem.Shapes.Create_Static_Box('floor', [0, -20, 0], [200, 10, 200], undefined, floor_mat);
+            //gem.Shapes.Create_Static_Box('wall1', [102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
+            //gem.Shapes.Create_Static_Box('wall2', [-102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
+            //gem.Shapes.Create_Static_Box('wall3', [0, 15, 102.5], [5, 80, 210], [0, 90, 0], wall_mat);
+            //gem.Shapes.Create_Static_Box('wall4', [0, 15, -102.5], [5, 80, 210], [0, 90, 0], wall_mat);
+
+            //Build out the Terrain using planes
+            gem.Shapes.Create_Static_Plane('floor', [0, -20, 0], [200, 1, 200], undefined, floor_mat);
 
 
 
-            //Build out the Terrain.
-            gem.Shapes.Create_Static_Box('floor', [0, -20, 0], [200, 10, 200], undefined, floor_mat);
-            gem.Shapes.Create_Static_Box('wall1', [102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
-            gem.Shapes.Create_Static_Box('wall2', [-102.5, 15, 0], [5, 80, 200], undefined, wall_mat);
-            gem.Shapes.Create_Static_Box('wall3', [0, 15, 102.5], [5, 80, 210], [0, 90, 0], wall_mat);
-            gem.Shapes.Create_Static_Box('wall4', [0, 15, -102.5], [5, 80, 210], [0, 90, 0], wall_mat);
+
+
+
+
+
+
+
 
 
             gem.GameLoop = function () {
 
             }//End GameLoop()
             gem.Start();
-
-
-
-
-
-            //----------------------------------------
-
-            //Randomly Create Sphere's and drop them into the scene
-            var cur = 0;
-            var Food = function () {
-                var x = rand(-20, 20);
-                var y = rand(100, 200);
-                var z = rand(-20, 20);
-
-                var sph_update = function (me) {
-                    if (me.body.body.position.y < -25) {
-                        gem.Remove_Entity(me.id);
-                    }
-                };
-                gem.Create_Dynamic_Sphere(String(cur), [x, y, z], [5, 5, 5], undefined, undefined, undefined, sph_update);
-                cur++;
-            };//End Food()
-
-            //----------------------
-            /* random number */
-            function rand(min, max, n) {
-                var r, n = n || 0;
-                if (min < 0) r = min + Math.random() * (Math.abs(min) + max);
-                else r = min + Math.random() * max;
-                return r.toFixed(n) * 1;
-            }//End rand()
 
         </script>
     </body>
