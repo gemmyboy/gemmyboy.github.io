@@ -44,6 +44,7 @@
             //Constants
             var factor = 5;
 
+            gem.Start();
 
             //Create all shapes
             gem.Shapes.Create_Static_Plane('floor', [0, -10, 0], [4000, 0.1, 4000], undefined, floor_mat);
@@ -73,38 +74,37 @@
             };//End onkeydown
 
 
-            var max = 36;
-            var start_x = -300;
-            var n = 5;
-            var x = 15;
-            var y = (x / 2);
-            var rope_opts = {
-                spring: [1, 1]
+            Make_Rope = function (segments, seg_size_x, wall_2_pos, wall_1_pos, name_convention) {
+                var max = segments;
+                var start_x = -300;
+                var n = 5;
+                var x = seg_size_x;
+                var y = (x / 2);
+                var rope_opts = {
+                    spring: [10, 1],
+                    config: [10000, 0.5, 0.5]
+                };
+
+                for (var i = 0; i < max; i++) {
+                    gem.Shapes.Create_Dynamic_Cylinder(name_convention+'_' + i, [start_x + (i * x), 200, 0], [n, x, n], [0, 0, 90], rope_mat);
+
+                    if (i != 0) gem.Add_Simple_Joint('jointHinge', name_convention+'_' + (i - 1), name_convention+'_' + i, [0, y, 0], [0, y * -1, 0], rope_opts);
+                }//End for
+
+                gem.Add_Simple_Joint('jointDistance', 'wall_2', name_convention+'_0', wall_2_pos, [0, y * -1, 0]);
+                gem.Add_Simple_Joint('jointDistance', 'wall_1', name_convention+'_' + (max - 1), wall_1_pos, [0, y, 0]);
+
             };
 
-            for (var i = 0; i < max; i++) {
-                gem.Shapes.Create_Dynamic_Cylinder('cyl_' + i, [start_x + (i * x), 200, 0], [n, x, n], [0, 0, 90], rope_mat);
+            var max = 14;//14;
+            var x = max * 3;//42;
 
-                if (i != 0) gem.Add_Simple_Joint('jointHinge', 'cyl_' + (i - 1), 'cyl_' + i, [0, y, 0], [0, y * -1, 0], rope_opts);
-            }//End for
+            Make_Rope(max, x, [8, 150, 90], [-8, 150, 90], 'cyl1');
+            Make_Rope(max, x, [8, 150, 50], [-8, 150, 50], 'cyl2');
+            Make_Rope(max, x, [8, 150, 0], [-8, 150, 0], 'cyl2.5');
+            Make_Rope(max, x, [8, 150, -50], [-8, 150, -50], 'cyl3');
+            Make_Rope(max, x, [8, 150, -90], [-8, 150, -90], 'cyl4');
 
-            gem.Add_Simple_Joint('jointDistance', 'wall_2', 'cyl_0', [8, 150, 0], [0, y * -1, 0]);
-            gem.Add_Simple_Joint('jointDistance', 'wall_1', 'cyl_' + (max - 1), [-8, 150, 0], [0, y, 0]);
-
-
-
-            Sleep = function () {
-                for (var num in gem.entity_keys) {
-                    gem.entities[gem.entity_keys[num]].body.body.sleep();
-                }
-            };
-
-
-            
-
-
-
-            gem.Start();
         </script>
     </body>
 </html>

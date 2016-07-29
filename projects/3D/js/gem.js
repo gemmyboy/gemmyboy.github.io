@@ -138,8 +138,15 @@ var gem = {
     //Finishes the insertion into the World - DO NOT USE OUTSIDE GEM
     Internal_Simple_Add: function (id, oimo_opts, mesh, update_func) {
         oimo_opts.name = id;
+
+        var temp_id = id;
+        while (gem.entities[temp_id] != undefined) {
+            temp_id += '_0';
+        }
+
+
         var entity = {
-            id: id,
+            id: temp_id,
             body: new OIMO.Body(oimo_opts),         //Inserts Rigidbody
             mesh: mesh,
             state: { update: true, entity_complex: false },
@@ -219,8 +226,8 @@ var gem = {
         opts.body2= en_2;
         opts.pos1 = pos_1;
         opts.pos2 = pos_2;
-        opts.min = 0;
-        opts.max = 1;
+        opts.min = 1;
+        opts.max = 2;
         opts.collision = true;
 
         //Queue up the work order
@@ -417,7 +424,7 @@ var gem = {
         },//End Create_Static_Box()
 
         //creates a dynamic box - all parameters are optional
-        Create_Dynamic_Box: function (id, pos_array, size_array, rot_array, opt_mesh, opt_body_opts, opt_update_func) {
+        Create_Dynamic_Box: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
             var box = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'box');
             box.body.CanMove(true);
 
