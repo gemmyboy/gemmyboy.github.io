@@ -79,6 +79,20 @@ var gem = {
         gem.Create();
     },//End Reset()
 
+    //Freezes all Physics in the World
+    Sleep: function () {
+        for (var num in gem.entity_keys) {
+            gem.entities[gem.entity_keys[num]].body.body.sleep();
+        }
+    },
+
+    //Unfreezes all Physics in the world
+    Awake: function () {
+        for (var num in gem.entity_keys) {
+            gem.entities[gem.entity_keys[num]].body.body.awake();
+        }
+    },
+
     //Internal Render call. Gem deals with all graphical render calls :D
     Internal_Render_Loop: function () {
         requestAnimationFrame(gem.Internal_Render_Loop);
@@ -205,8 +219,8 @@ var gem = {
         opts.body2= en_2;
         opts.pos1 = pos_1;
         opts.pos2 = pos_2;
-        opts.min = 2;
-        opts.max = 20;
+        opts.min = 0;
+        opts.max = 1;
         opts.collision = true;
 
         //Queue up the work order
@@ -592,7 +606,7 @@ var gem = {
         },//End Setup()
 
         Camera: function () {
-            gem.world.camera = new THREE.PerspectiveCamera(60, gem.settings.w / gem.settings.h, 0.1, 2000);
+            gem.world.camera = new THREE.PerspectiveCamera(60, gem.settings.w / gem.settings.h, 0.1, 10000);
 
             gem.world.Navigation = function (root) {
                 this.parent = root;

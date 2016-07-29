@@ -16,7 +16,7 @@
         <script>
             gem.Create_World();
 
-            //Materials
+            //Create the Floor Material
             var floor_opts = gem.Materials.Generate_Material_Opts();
             floor_opts.Set_Diffuse_Texture(gem.Texture.Load_Tiled_Texture("assets/seamless-moss-2.png"));
             floor_opts.Set_Specular_Texture(gem.Texture.Load_Tiled_Texture("assets/seamless-moss-2_SPECULAR.png"));
@@ -24,14 +24,25 @@
             floor_opts.Set_Reflectivity(10);
             var floor_mat = gem.Materials.Create_Phong_Material(floor_opts.GetOpts());
 
+            //Create the Rope Material
             var rope_opts = gem.Materials.Generate_Material_Opts();
             rope_opts.Set_Color(0x654321);
             rope_opts.Set_Specular_Color(0xdddddd);
             var rope_mat = gem.Materials.Create_Phong_Material(rope_opts.GetOpts());
 
+            //Create the Obstacle Material
             var obs_opts = gem.Materials.Generate_Material_Opts();
             obs_opts.Set_Color(0x002300);
             var obs_mat = gem.Materials.Create_Phong_Material(obs_opts.GetOpts());
+
+            //Create custom Physics for Rope segments
+            //var rope_seg_opts = gem.Generate_Simple_Entity_Oimo_Opts();
+            //rope_seg_opts.SetMass(10000);
+            //rope_seg_opts.SetDensity(10000);
+
+
+            //Constants
+            var factor = 5;
 
 
             //Create all shapes
@@ -40,24 +51,58 @@
             gem.Shapes.Create_Static_Box('obstacle_1', [0, 85, 140], [100, 20, 20], undefined, obs_mat);
             gem.Shapes.Create_Static_Box('obstacle_2', [0, 85, -140], [100, 20, 20], undefined, obs_mat);
 
-
             gem.Shapes.Create_Static_Box('wall_1', [300, 180, 0], [20, 400, 200], undefined, obs_mat);
             gem.Shapes.Create_Static_Box('wall_2', [-300, 180, 0], [20, 400, 200], undefined, obs_mat);
 
-            var max = 40;
+            //Register onkeydown events
+            var Stretch = function (entity1, entity2, factor) {
+                var pos1 = entity1.Get_Position();
+                entity1.Set_Position(pos1.x += factor, pos1.y, pos1.z);
+
+                var pos2 = entity2.Get_Position();
+                entity2.Set_Position(pos2.x -= factor, pos2.y, pos2.z);
+            };
+            document.onkeydown = function (e) {
+                var en1 = gem.entities['wall_1'];
+                var en2 = gem.entities['wall_2'];
+                e = e || window.event;
+                switch (e.keyCode) {
+                    case 87: Stretch(en1, en2, factor); break;
+                    case 83: Stretch(en1, en2, factor * -1); break;
+                }//End Switch
+            };//End onkeydown
+
+
+            var max = 36;
             var start_x = -300;
             var n = 5;
             var x = 15;
             var y = (x / 2);
+            var rope_opts = {
+                spring: [1, 1]
+            };
 
             for (var i = 0; i < max; i++) {
                 gem.Shapes.Create_Dynamic_Cylinder('cyl_' + i, [start_x + (i * x), 200, 0], [n, x, n], [0, 0, 90], rope_mat);
 
-                if (i != 0) gem.Add_Simple_Joint('jointBall', 'cyl_' + (i - 1), 'cyl_' + i, [0, y, 0], [0, y * -1, 0]);
+                if (i != 0) gem.Add_Simple_Joint('jointHinge', 'cyl_' + (i - 1), 'cyl_' + i, [0, y, 0], [0, y * -1, 0], rope_opts);
             }//End for
 
-            gem.Add_Simple_Joint('jointBall', 'wall_1', 'cyl_0', [-10, 150, 0], [0, ((x / 2) + 1) * -1, 0]);
-            gem.Add_Simple_Joint('jointBall', 'wall_2', 'cyl_' + (max - 1), [10, 150, 0], [0, y, 0]);
+            gem.Add_Simple_Joint('jointDistance', 'wall_2', 'cyl_0', [8, 150, 0], [0, y * -1, 0]);
+            gem.Add_Simple_Joint('jointDistance', 'wall_1', 'cyl_' + (max - 1), [-8, 150, 0], [0, y, 0]);
+
+
+
+            Sleep = function () {
+                for (var num in gem.entity_keys) {
+                    gem.entities[gem.entity_keys[num]].body.body.sleep();
+                }
+            };
+
+
+            
+
+
 
             gem.Start();
         </script>
