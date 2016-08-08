@@ -374,7 +374,8 @@ var gem = {
     Shapes: {
 
         //Internal Shape creator... DON'T USE OUTSIDE GEM
-        Internal_Create_Shape: function (id, pos_array, size_array, rot_array, opt_material, opt_body_opts, shape_type) {
+        //  --Geometry var only used for custom shapes like Points or Convex models
+        Internal_Create_Shape: function (id, pos_array, size_array, rot_array, geometry, opt_material, opt_body_opts, shape_type) {
             var core_shape = {};
 
             //For all shapes:
@@ -409,6 +410,11 @@ var gem = {
                 var core_shape_geo = new THREE.PlaneBufferGeometry(1.0, 1.0);
                 core_shape_geo.applyMatrix(new THREE.Matrix4().makeRotationX(-90 * gem.Helper.ToRad))
                 core_shape.mesh = new THREE.Mesh(core_shape_geo, mat);
+            } else if (shape_type == 'points') {
+                core_shape.body.SetType(core_shape.body.type.sphere);
+                var mat = opt_material || new THREE.PointsMaterial({size: 1, color: 0xdddddd});
+                var core_shape_geo = geometry || new THREE.BufferGeometry().fromGeometry(new THREE.SphereGeometry(1, 32, 32));
+                core_shape.mesh = new THREE.Points(core_shape_geo, mat);
             }
 
             return core_shape;
@@ -417,7 +423,7 @@ var gem = {
 
         //Creates a static box - all parameters are optional
         Create_Static_Box: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
-            var box = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'box');
+            var box = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, undefined, opt_mat, opt_body_opts, 'box');
             box.body.CanMove(false);
 
             gem.Add_Simple_Entity(box.id, box.body.GetOpts(), box.mesh, opt_update_func);
@@ -425,7 +431,7 @@ var gem = {
 
         //creates a dynamic box - all parameters are optional
         Create_Dynamic_Box: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
-            var box = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'box');
+            var box = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, undefined, opt_mat, opt_body_opts, 'box');
             box.body.CanMove(true);
 
             gem.Add_Simple_Entity(box.id, box.body.GetOpts(), box.mesh, opt_update_func);
@@ -433,7 +439,7 @@ var gem = {
 
         //Creates a static sphere - all parameters are optional
         Create_Static_Sphere: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
-            var sph = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'sphere');
+            var sph = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, undefined, opt_mat, opt_body_opts, 'sphere');
             sph.body.CanMove(false);
 
             gem.Add_Simple_Entity(sph.id, sph.body.GetOpts(), sph.mesh, opt_update_func);
@@ -441,7 +447,7 @@ var gem = {
 
         //Creates a dynamic sphere - all parameters are optional
         Create_Dynamic_Sphere: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
-            var sph = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'sphere');
+            var sph = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, undefined, opt_mat, opt_body_opts, 'sphere');
             sph.body.CanMove(true);
 
             gem.Add_Simple_Entity(sph.id, sph.body.GetOpts(), sph.mesh, opt_update_func);
@@ -449,7 +455,7 @@ var gem = {
 
         //Creates a static cylinder - all parameters are optional
         Create_Static_Cylinder: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
-            var cyl = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'cylinder');
+            var cyl = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, undefined, opt_mat, opt_body_opts, 'cylinder');
             cyl.body.CanMove(false);
 
             gem.Add_Simple_Entity(cyl.id, cyl.body.GetOpts(), cyl.mesh, opt_update_func);
@@ -457,7 +463,7 @@ var gem = {
 
         //Creates a dynamic cylinder - all parameters are optional
         Create_Dynamic_Cylinder: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
-            var cyl = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'cylinder');
+            var cyl = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, undefined, opt_mat, opt_body_opts, 'cylinder');
             cyl.body.CanMove(true);
 
             gem.Add_Simple_Entity(cyl.id, cyl.body.GetOpts(), cyl.mesh, opt_update_func);
@@ -465,7 +471,7 @@ var gem = {
 
         //Creates a static plane - all parameters are optional
         Create_Static_Plane: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
-            var pla = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'plane');
+            var pla = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, undefined, opt_mat, opt_body_opts, 'plane');
             pla.body.CanMove(false);
 
             gem.Add_Simple_Entity(pla.id, pla.body.GetOpts(), pla.mesh, opt_update_func);
@@ -473,11 +479,27 @@ var gem = {
 
         //Creates a dynamic plane - all parameters are optional
         Create_Dynamic_Plane: function (id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, opt_update_func) {
-            var pla = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, opt_mat, opt_body_opts, 'plane');
+            var pla = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, undefined, opt_mat, opt_body_opts, 'plane');
             pla.body.CanMove(false);
 
             gem.Add_Simple_Entity(pla.id, pla.body.GetOpts(), pla.mesh, opt_update_func);
-        }//End Create_Dynamic_Plane()
+        },//End Create_Dynamic_Plane()
+
+        //Creates a static shape with given geometry and mat. This created a Points Mesh Object
+        Create_Static_Points: function (id, pos_array, size_array, rot_array, geometry, opt_mat, opt_body_opts, opt_update_func) {
+            var poi = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, geometry, opt_mat, opt_body_opts, 'points');
+            poi.body.CanMove(false);
+
+            gem.Add_Simple_Entity(poi.id, poi.body.GetOpts(), poi.mesh, opt_update_func);
+        },//End Create_Static_Points()
+
+        //Creates a dynamic shape with given geometry and mat. This created a Points Mesh Object
+        Create_Dynamic_Points: function (id, pos_array, size_array, rot_array, geometry, opt_mat, opt_body_opts, opt_update_func) {
+            var poi = gem.Shapes.Internal_Create_Shape(id, pos_array, size_array, rot_array, geometry, opt_mat, opt_body_opts, 'points');
+            poi.body.CanMove(true);
+
+            gem.Add_Simple_Entity(poi.id, poi.body.GetOpts(), poi.mesh, opt_update_func);
+        }//End Create_Dynamic_Points()
 
     },//End Shapes
 
@@ -492,6 +514,11 @@ var gem = {
                 return new THREE.MeshPhongMaterial(materials_opts);
             else if (type == 'lambert')
                 return new THREE.MeshLambertMaterial(materials_opts);
+            else if (type == 'points') {
+                materials_opts.vertexColors = THREE.VertexColors;
+                materials_opts.size = materials_opts.size || 4;
+                return new THREE.PointsMaterial(materials_opts);
+            }
             else
                 return undefined;
         },//End Internal_Create_Materials(0
@@ -501,6 +528,9 @@ var gem = {
         Create_Lambert_Material: function (material_opts) {
             return gem.Materials.Internal_Create_Material(material_opts, 'lambert')
         },//End Create_Lambert_Material()
+        Create_Points_Material: function (material_opts) {
+            return gem.Materials.Internal_Create_Material(material_opts, 'points');
+        },//End Create_Points_Material()
         Generate_Material_Opts: function () {
             var mat_opts = {
                 opts: {},
@@ -522,7 +552,8 @@ var gem = {
                 Set_Reflectivity: function (int) { this.opts.reflectivity = int || 1; },
                 Set_Specular_Color: function (hex_color) { this.opts.specular = hex_color || 0x111111; },
                 Set_Fog: function (bool) { this.opts.fog = bool || true; },
-                Set_Wireframe: function (bool) {this.opts.wireframe = bool || true; },
+                Set_Wireframe: function (bool) { this.opts.wireframe = bool || true; },
+                Set_Size: function (int) { this.opts.size = int || 4},
                 GetOpts: function () { return this.opts; }
             };
             return mat_opts;
@@ -534,6 +565,18 @@ var gem = {
     Mesh: {
 
     },//End Mesh
+
+    //Specifically sized Geometry to match Oimo-Physics
+    Geometry: {
+        Box: function() { return new THREE.BufferGeometry().fromGeometry(new THREE.BoxGeometry(1, 1, 1)); },
+        Sphere: function() { return new THREE.BufferGeometry().fromGeometry(new THREE.SphereGeometry(1, 32, 32)); },
+        Cylinder: function() { return new THREE.BufferGeometry().fromGeometry(new THREE.CylinderGeometry(1, 1, 1, 12, 1)); },
+        Plane: function() {
+            var core_shape_geo = new THREE.PlaneBufferGeometry(1.0, 1.0);
+            core_shape_geo.applyMatrix(new THREE.Matrix4().makeRotationX(-90 * gem.Helper.ToRad))
+            return core_shape_geo;
+        }//End Plane
+    },//End Geometry
 
 
     //Used just to load in textures which we'll then throw into the materials

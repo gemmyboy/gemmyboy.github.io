@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8" />
+        <title>Gem Test</title>
+
+        <!-- Import gem and all it's dependencies -->
+        <script src="js/three.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script src="js/oimo.js"></script>
+        <script src="js/gem.js"></script>
+        <script src="js/quickhull-ext.js"></script>
+    </head>
+    <body style="margin: 0px">
+        <div id="container"></div>
+        <script>
+            gem.Create_World();
+
+            //Materials
+            var mat_opt = gem.Materials.Generate_Material_Opts();
+            mat_opt.Set_Color(0x123456);
+
+            var mat_point = gem.Materials.Generate_Material_Opts();
+            mat_point.Set_Color(0x987654);
+            mat_point.Set_Size(4);
+
+
+            //Shapes
+            gem.Shapes.Create_Static_Plane("floor", undefined, [1000, 1, 1000], undefined, gem.Materials.Create_Phong_Material(mat_opt.GetOpts()));
+
+            gem.Shapes.Create_Dynamic_Points("Odd_sph", [0, 100, 0], [50, 50, 50], undefined);
+            gem.Shapes.Create_Dynamic_Sphere("Odd_sph_1", [100, 100, 0], [50, 50, 50], undefined);
+
+            gem.Start();
+        </script>
+    </body>
+</html>

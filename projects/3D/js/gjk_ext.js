@@ -56,6 +56,8 @@ var Gjk = {
 
 
 //Vec3 additions
+//  --NOTE: for GJK, Dot() works because we're using a scalar projection
+//      
 var getFarthestPoint = function (vec3_direction) {
     this.verts = [];    //Load in vertices here
 

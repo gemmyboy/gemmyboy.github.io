@@ -8,20 +8,34 @@
         <!-- Import gem and all it's dependencies -->
         <script src="js/three.js"></script>
         <script src="js/OrbitControls.js"></script>
-        <script src="js/oimo.min.js"></script>
+        <script src="js/oimo.js"></script>
         <script src="js/gem.js"></script>
     </head>
     <body style="margin: 0px">
         <div id="container"></div>
         <script>
             gem.Create_World();
-            gem.Helper.Light();
 
-            gem.Shapes.Create_Static_Box('base_box', [0, -20, 0], [100, 10, 100]);
-            gem.Shapes.Create_Static_Box('wall1', [-50, 0, 0], [10, 50, 100]);
-            gem.Shapes.Create_Static_Box('wall2', [50, 0, 0], [10, 50, 100]);
-            gem.Shapes.Create_Static_Box('wall3', [0, 0, -55], [10, 50, 110], [0, 90, 0]);
-            gem.Shapes.Create_Static_Box('wall4', [0, 0, 55], [10, 50, 110], [0, 90, 0]);
+            //Wall mat
+            var wall_mat_opts = gem.Materials.Generate_Material_Opts();
+            wall_mat_opts.Set_Color(0x6663300);
+
+            //Pea mat
+            var pea_mat_opts = gem.Materials.Generate_Material_Opts();
+            pea_mat_opts.Set_Color(0x006400);
+            pea_mat_opts.Set_Size(1);
+            pea_mat_opts.Set_Specular_Color(0xdddddd);
+            pea_mat_opts.Set_Shininess(5);
+
+            //Oimo pea opts
+            var oimo_pea_opts = gem.Generate_Simple_Entity_Oimo_Opts();
+            oimo_pea_opts.SetType(oimo_pea_opts.type.sphere);
+
+            gem.Shapes.Create_Static_Box('base_box', [0, -20, 0], [100, 10, 100], undefined, gem.Materials.Create_Phong_Material(wall_mat_opts.GetOpts()));
+            gem.Shapes.Create_Static_Box('wall1', [-50, 0, 0], [10, 50, 100], undefined, gem.Materials.Create_Phong_Material(wall_mat_opts.GetOpts()));
+            gem.Shapes.Create_Static_Box('wall2', [50, 0, 0], [10, 50, 100], undefined, gem.Materials.Create_Phong_Material(wall_mat_opts.GetOpts()));
+            gem.Shapes.Create_Static_Box('wall3', [0, 0, -55], [10, 50, 110], [0, 90, 0], gem.Materials.Create_Phong_Material(wall_mat_opts.GetOpts()));
+            gem.Shapes.Create_Static_Box('wall4', [0, 0, 55], [10, 50, 110], [0, 90, 0], gem.Materials.Create_Phong_Material(wall_mat_opts.GetOpts()));
 
 
             var max = 1000;
@@ -39,7 +53,9 @@
                             gem.Remove_Entity(me.id);
                         }
                     };
-                    gem.Shapes.Create_Dynamic_Sphere(String(cur), [x, y, z], [5, 5, 5], undefined, undefined, undefined, sph_update);
+                    //gem.Shapes.Create_Dynamic_Points(String(cur), [x, y, z], [4, 4, 4], undefined, undefined, gem.Materials.Create_Points_Material(pea_mat_opts.GetOpts()), undefined, sph_update);
+                    gem.Shapes.Create_Dynamic_Sphere(String(cur*1000), [x, y, z], [5, 5, 5], undefined, 
+                        gem.Materials.Create_Phong_Material(pea_mat_opts.GetOpts()), oimo_pea_opts.GetOpts(), sph_update);
                     cur++;
 
                 }//End if
