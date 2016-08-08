@@ -1,6 +1,6 @@
 ﻿/*
     GJK-Extension for Oimo.js
-        by Marcus Shannon
+        by Gem
     
     Here I'll be implementing the Algorithm GJK and then pulling that into Oimo.js ;
 
