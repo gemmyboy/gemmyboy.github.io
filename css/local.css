@@ -51,3 +51,19 @@ body #site_content {
     padding-top: 10%;
     position:relative;
 }
+
+.tile {
+    border-radius: 3px 4px;
+    background-color: #ddd;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    height: 15%;
+    width: 100%;
+    color: #333;
+}
+
+.text-vertical-middle {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}

@@ -1,0 +1,96 @@
+﻿<html>
+    <header>
+        <title>Home</title>
+        <link href="../css/local.css" rel="stylesheet" />
+        <!-- JQuery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        <!-- Bootstrap things -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    </header>
+    <body class="container-fluid" style="padding: 0px; background-color: #266A2E;">
+        <div id="site_header" class="row phase_bg">
+            <div class="col-sm-1" style="padding-top: 5px; padding-left: 5px; text-align: left;">
+                <span class="fa-stack" style="font-size: 60%;">
+                    <a href="../index.html" style="color: white;">
+                        <i class="fa fa-square fa-stack-2x"></i>
+                        <strong class="fa fa-code fa-stack-1x animate_color"></strong>
+                    </a>
+                </span>
+            </div>
+            <div class="col-sm-1" style="padding-top: 5px; padding-left: 5px; text-align: left;">
+                <a href="../dev/index.html" style="color: white;">
+                    <span class="fa-stack" style="font-size: 60%;">
+                        <i class="fa fa-square fa-stack-2x"></i>
+                        <strong class="fa fa-user fa-stack-1x animate_color"></strong>
+                    </span>
+                </a>
+            </div>
+            <div class="col-sm-1" style="padding-top: 5px; padding-left: 5px; text-align: left;">
+                <a href="projects.html" style="color: white;">
+                    <span class="fa-stack" style="font-size: 60%;">
+                        <i class="fa fa-square fa-stack-2x"></i>
+                        <strong class="fa fa-bars fa-stack-1x animate_color"></strong>
+                    </span>
+                </a>
+            </div>
+        </div>
+        <div id="site_content" class="row" style="margin: auto;">
+            <div style="width: 80%; height: 60%; margin: auto;">
+                <div style="margin: 0px; overflow-y:scroll;" class="well">
+                    <div class="list-group">
+                        <a href="3D/rope.html">
+                            <button type="button" class="list-group-item list-group-action">
+                                <div style="display:inline-block; width: 40%;">
+                                    <h1><b>Rope Simulation</b></h1>
+                                </div>
+                                <div style="display:inline-block; width: 50%;">
+                                    Uses Three.js and a physics library called Oimo.js with a package extension I created which is labeled gem.
+                                </div>
+                            </button>
+                        </a>
+                        <br />
+                        <a href="3D/peas_in_a_box.html">
+                            <button type="button" class="list-group-item list-group-action">
+                                <div style="display:inline-block; width: 40%;">
+                                    <h1><b>Peas in a Box</b></h1>
+                                </div>
+                                <div style="display:inline-block; width: 50%;">
+                                    Uses Three.js and a physics library called Oimo.js with a package extension I created which is labeled gem.
+                                    Spawns a crap ton of sphere that look like peas. ;) Might be a good way to text the limits of your machine.
+                                </div>
+                            </button>
+                        </a>
+                        <br />
+                        <a href="3D/sand.html">
+                            <button type="button" class="list-group-item list-group-action">
+                                <div style="display:inline-block; width: 40%;">
+                                    <h1><b>Sand Simulation</b></h1>
+                                </div>
+                                <div style="display:inline-block; width: 50%;">
+                                    Uses Three.js and a physics library called Oimo.js with a package extension I created which is labeled gem.
+                                    This is significantly more difficult and very much so incomplete.
+                                </div>
+                            </button>
+                        </a>
+                        <br />
+                        <a href="3D/collector.html">
+                            <button type="button" class="list-group-item list-group-action">
+                                <div style="display:inline-block; width: 40%;">
+                                    <h1><b>Collector</b></h1>
+                                </div>
+                                <div style="display:inline-block; width: 50%;">
+                                    Uses Three.js and a physics library called Oimo.js with a package extension I created which is labeled gem.
+                                    This is supposed to be a project where you're a vacuum that collects the dust. However I need to work on the 
+                                    Sand simulation project to make this more feasible. :P
+                                </div>
+                            </button>
+                        </a>
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
