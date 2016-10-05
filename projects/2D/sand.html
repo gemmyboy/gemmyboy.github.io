@@ -5,6 +5,10 @@
         <meta charset="utf-8" />
         <title>Sand Physics Derp</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        <script src="http://www.dematte.at/colorPicker/colors.js"></script>
+        <script src="http://www.dematte.at/colorPicker/colorPicker.data.js"></script>
+        <script src="http://www.dematte.at/colorPicker/colorPicker.js"></script>
+        <script src="http://www.dematte.at/colorPicker/jQuery_implementation/jqColor.js"></script>
     </head>
     <body>
         <div class="controls">
@@ -21,8 +25,17 @@
                     Air-Resistance <br />
                     <input id="air_resistance" type="text" value="4" />
                 </div>
-                <div class="col-md-6">
-
+                <div class="col-md-1" style="display: inline-block;">
+                    Line Brush <br />
+                    <button id="line">Line</button>
+                </div>
+                <div class="col-md-1" style="display: inline-block;">
+                    Scattered Brush <br />
+                    <button id="scatter">Scattered</button>
+                </div>
+                <div class="col-md-1" style="display: inline-block;">
+                    Color <br />
+                    <input id="color" class="color" value="#dddddd" />
                 </div>
             </div>
         </div>
@@ -67,11 +80,14 @@
         var static_counter = 3;
         var t = [-2, -1, 0, 1, 2];
         var sprinkle = false;
+        var line = false;
+        var scatter = true;
         var current_mouse_x = 100, current_mouse_y = 100;
+
 
         //Collision State Data
         var collision_matrix = []
-        var maxX = window.innerWidth + 1;
+        var maxX = window.innerWidth + 20;
         var maxY = window.innerHeight + 20;
 
         //Populate Matrix
@@ -83,6 +99,17 @@
                 collision_matrix[i][k] = {s: false, b: false};
             }//End for
         }//End for
+
+        //Attach click functions
+        $("#line").click(function () {
+            scatter = line;
+            line = !line;
+        });
+        $("#scatter").click(function () {
+            line = scatter;
+            scatter = !scatter;
+        });
+        $("#color").colorPicker({});
 
         var SpawnSand = function (x, y, x_v) {
             if (x < 0) return;
@@ -118,15 +145,27 @@
             if (sprinkle) {
                 //Check collision matrix so no overlap occurs.
                 if (!collision_matrix[current_mouse_x][current_mouse_y].b) {
-                    for (var i = 0; i < $("#brush").val() ; i++) {
-                        if (i == 0) {
-                            SpawnSand(current_mouse_x, current_mouse_y, i);
-                        } else if (i % 2 == 0) {
-                            SpawnSand(current_mouse_x, current_mouse_y, ((i * -1) / 2));
-                        } else {
-                            SpawnSand(current_mouse_x, current_mouse_y, (((i - 1) / 2) + 1));
-                        }
-                    }//End for
+                    if (line) {
+                        for (var i = 0; i < $("#brush").val() ; i++) {
+                            if (i == 0) {
+                                SpawnSand(current_mouse_x, current_mouse_y, 0);
+                            } else if (i % 2 == 0) {
+                                SpawnSand(current_mouse_x + ((i * -1) / 2), current_mouse_y, 0);
+                            } else {
+                                SpawnSand(current_mouse_x + (((i - 1) / 2) + 1), current_mouse_y, 0);
+                            }
+                        }//End for
+                    } else if (scatter) {
+                        for (var i = 0; i < $("#brush").val() ; i++) {
+                            if (i == 0) {
+                                SpawnSand(current_mouse_x, current_mouse_y, i);
+                            } else if (i % 2 == 0) {
+                                SpawnSand(current_mouse_x, current_mouse_y, ((i * -1) / 2));
+                            } else {
+                                SpawnSand(current_mouse_x, current_mouse_y, (((i - 1) / 2) + 1));
+                            }
+                        }//End for
+                    }//End else if
                 }//End if
             }//End if
 
@@ -167,7 +206,7 @@
 
                 //Draw Square instance
                 ctx.beginPath();
-                ctx.fillStyle = "#dddddd";
+                ctx.fillStyle = $("#color").val();
                 ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.closePath();
 
