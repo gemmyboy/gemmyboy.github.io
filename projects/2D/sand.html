@@ -8,10 +8,21 @@
     </head>
     <body>
         <div class="controls">
-            <div class="row" style="margin: 0px; padding: 10px;">
-                <div class="col-md-2" style="margin: auto;">
+            <div class="row" style="margin: 0px; padding: 10px; display: inline-block;">
+                <div class="col-md-2" style="display: inline-block;">
                     Brush<br />
-                    <input id="brush" type="range" value="5" />
+                    <input id="brush" type="text" value="5" />
+                </div>
+                <div class="col-md-2" style="display: inline-block;">
+                    Gravity<br />
+                    <input id="gravity" type="text" value="10" />
+                </div>
+                <div class="col-md-2" style="display: inline-block;">
+                    Air-Resistance <br />
+                    <input id="air_resistance" type="text" value="4" />
+                </div>
+                <div class="col-md-6">
+
                 </div>
             </div>
         </div>
@@ -33,6 +44,7 @@
         background-color: #654321;
         z-index: 1;
         position: absolute;
+        color: #ddd;
     }
 </style>
 
@@ -44,7 +56,6 @@
         canvas.height = window.innerHeight;
 
         var ctx = canvas.getContext("2d");
-        var gravity = 20;
 
         //Queue's used for handling the general sand objects
         var queue_update = [];
@@ -61,7 +72,7 @@
         //Collision State Data
         var collision_matrix = []
         var maxX = window.innerWidth + 1;
-        var maxY = window.innerHeight + gravity;
+        var maxY = window.innerHeight + 20;
 
         //Populate Matrix
         for (var i = 0; i < maxX; i++) {
@@ -73,33 +84,35 @@
             }//End for
         }//End for
 
-        var SpawnSand = function (x, y) {
+        var SpawnSand = function (x, y, x_v) {
             if (x < 0) return;
             if (y < 0) return;
             if (x > (window.innerWidth - 1)) return;
             if (y > (window.innerHeight - 1)) return;
             var s = new Sand();
+            s.speed_x = x_v;
             s.Create(x, y);
             queue_update.push(s);
         };
 
         //Overall Update Call
         var Update = function () {
-            Reset();
 
             //Update
             var l = queue_update.length;
             while (l--) {
                 if (!queue_update[l].Update()) {
-                    queue_static.push(queue_update.splice(l, 1)[0]);
+                    var s = queue_update.splice(l, 1)[0];
+                    s.Draw();
+                    queue_static.push(s);
                 }//End if
             }//End while
 
             //Draw
             l = queue_update.length;
             while (l--) { queue_update[l].Draw(); }
-            l = queue_static.length;
-            while (l--) { queue_static[l].Draw(); }
+            //l = queue_static.length;
+            //while (l--) { queue_static[l].Draw(); }
 
             //Make Sand
             if (sprinkle) {
@@ -107,11 +120,11 @@
                 if (!collision_matrix[current_mouse_x][current_mouse_y].b) {
                     for (var i = 0; i < $("#brush").val() ; i++) {
                         if (i == 0) {
-                            SpawnSand(current_mouse_x, current_mouse_y);
+                            SpawnSand(current_mouse_x, current_mouse_y, i);
                         } else if (i % 2 == 0) {
-                            SpawnSand(current_mouse_x + ((i * -1)/2), current_mouse_y);
+                            SpawnSand(current_mouse_x, current_mouse_y, ((i * -1) / 2));
                         } else {
-                            SpawnSand(current_mouse_x + (((i-1)/2)+1), current_mouse_y);
+                            SpawnSand(current_mouse_x, current_mouse_y, (((i - 1) / 2) + 1));
                         }
                     }//End for
                 }//End if
@@ -121,9 +134,9 @@
             requestAnimationFrame(Update);
         };
 
-        var Reset = function () {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        };
+        //var Reset = function () {
+        //    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //};
 
         var Sand = function () {
             this.x = 0;
@@ -132,7 +145,9 @@
             this.past_y = 0;
             this.width = 1;
             this.height = 1;
-            this.speed = gravity;
+            this.speed_y = Number($("#gravity").val());
+            this.speed_x = 0;
+            this.motion_count = 0;
             this.touch_bottom = false;
             this.Create = function (x, y) {
                 this.x = x;
@@ -143,36 +158,53 @@
                 collision_matrix[x][y].s = false;
             };//End Create()
             this.Draw = function () {
+                //Clear single instance
+                ctx.clearRect(this.past_x, this.past_y, this.width, this.height);
+                //ctx.beginPath();
+                //ctx.fillStyle = "#0d3b02";
+                //ctx.fillRect(this.past_x, this.past_y, this.width, this.height);
+                //ctx.closePath();
+
+                //Draw Square instance
                 ctx.beginPath();
-                //ctx.arc(this.x, this.y, this.width, 0, 2 * Math.PI);
                 ctx.fillStyle = "#dddddd";
                 ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.closePath();
+
+                //Circle Code
+                //ctx.arc(this.x, this.y, this.width, 0, 2 * Math.PI);
                 //ctx.stroke();
                 //ctx.fill();
             };//End Draw()
-            this.DrawOther = function () {
-                ctx.beginPath();
-                //ctx.arc(this.x, this.y, this.width, 0, 2 * Math.PI);
-                ctx.fillStyle = "#000000";
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            };
 
             //False will place Sand particle in static queue.
             //True will keep it in update queue.
             this.Update = function () {
+
+                var gravity = Number($("#gravity").val());
+                var air_resistance = Number($("#air_resistance").val());
+
+                //Record past coords
+                this.past_x = this.x;
+                this.past_y = this.y;
+
                 //Do all physics checks here
+                this.y += this.speed_y;
+                this.x += this.speed_x;
 
-                this.DrawOther();
-
-                this.y += this.speed;
-
+                //Run border checks
+                if (this.x < 0) this.x = 0;
+                if (this.x > (window.innerWidth - 1)) this.x = window.innerWidth - 1;
 
                 //Collision check for other sand directly underneath
-                var delta = (this.y - this.past_y);
-                if (delta > 0) {
-                    for (var t_i = 1; t_i <= delta; t_i++) {
+                var delta_down = (this.y - this.past_y);
+
+                //var delta_left = (
+                if (delta_down > 0) {
+                    for (var t_i = 1; t_i <= delta_down; t_i++) {
                         if (collision_matrix[this.x][this.past_y + t_i].b && collision_matrix[this.x][this.past_y + t_i].s) {
-                            this.speed = 0;
+                            this.speed_y = 0;
+                            this.speed_x = 0;
                             collision_matrix[this.past_x][this.past_y].b = false;
                             collision_matrix[this.past_x][this.past_y].s = false;
                             collision_matrix[this.x][this.past_y + (t_i - 1)].b = true;
@@ -181,11 +213,12 @@
                             return false;
                         }//End if
                     }//End for
-                }//End if
+                }
 
                 //Check border condition or very bottom
                 if (this.y + this.height > canvas.height) {
-                    this.speed = 0;
+                    this.speed_y = 0;
+                    this.speed_x = 0;
                     collision_matrix[this.past_x][this.past_y].b = false;
                     collision_matrix[this.past_x][this.past_y].s = false;
                     collision_matrix[Math.floor(this.x)][canvas.height - 1].b = true;
@@ -193,18 +226,20 @@
                     this.y = canvas.height-1;
                     return false;
                 } else {
-                    this.speed = gravity;
-                }
+                    this.speed_y = gravity;
+
+                    if (this.speed_x < 0) {
+                        this.speed_x += air_resistance;
+                    } else if (this.speed_x > 0) {
+                        this.speed_x -= air_resistance;
+                    }
+                }//End else
 
                 //Update Collision Matrix since we're moving downward.
-                if (Math.floor(this.x) != this.past_x || Math.floor(this.y) != this.past_y) {
-                    collision_matrix[this.past_x][this.past_y].b = false;
-                    collision_matrix[this.past_x][this.past_y].s = false;
-                    collision_matrix[Math.floor(this.x)][Math.floor(this.y)].b = true;
-                    collision_matrix[Math.floor(this.x)][Math.floor(this.y)].s = false;
-                    this.past_x = Math.floor(this.x);
-                    this.past_y = Math.floor(this.y);
-                }//End if
+                collision_matrix[this.past_x][this.past_y].b = false;
+                collision_matrix[this.past_x][this.past_y].s = false;
+                collision_matrix[this.x][this.y].b = true;
+                collision_matrix[this.x][this.y].s = false;
 
                 return true;
             };//End Update()
